@@ -1,5 +1,6 @@
 import { challengeRequest, playerToken } from "../../../lib/challenge-store.js";
 import { AttemptError } from "../../../lib/challenge-attempt.js";
+import { validChallengeOrigin } from "../../../lib/challenge-origin.js";
 export const runtime = "nodejs";
 export async function POST(request) {
   try {
@@ -8,8 +9,7 @@ export async function POST(request) {
         { error: "Ranked challenges are not configured yet." },
         { status: 503 },
       );
-    const origin = request.headers.get("origin");
-    if (origin && origin !== new URL(request.url).origin)
+    if (!validChallengeOrigin(request))
       return Response.json(
         { error: "Invalid request origin." },
         { status: 403 },
