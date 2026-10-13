@@ -341,14 +341,34 @@ export function createDaily(seed) {
   return { profile, paths: packedPuzzle(seed, profile), size: profile.size };
 }
 
-export function createChallenge(level, selectedDifficulty) {
+export const CHALLENGE_VERSION = 2;
+export function challengeDefinition(level, selectedDifficulty) {
+  const round = Math.max(1, Math.floor(level));
+  const orders = [
+    ["easy", "medium", "hard"],
+    ["medium", "hard", "easy"],
+    ["hard", "easy", "medium"],
+    ["easy", "hard", "medium"],
+    ["medium", "easy", "hard"],
+    ["hard", "medium", "easy"],
+  ];
+  const group = Math.floor((round - 1) / 3);
+  const hash = Math.imul(group + 37, 2654435761) >>> 0;
   const difficulty =
-    selectedDifficulty ??
-    (level <= 3
-      ? "easy"
-      : ["medium", "medium", "hard", "easy"][(level - 4) % 4]);
-  const stage = Math.min(2, Math.floor((level - 1) / 24));
-  const size = { easy: 9, medium: 12, hard: 15 }[difficulty] + stage;
+    selectedDifficulty ?? orders[hash % orders.length][(round - 1) % 3];
+  const size = { easy: 9, medium: 12, hard: 15 }[difficulty];
+  const pressure = Math.min(0.18, Math.floor((round - 1) / 12) * 0.03);
+  return {
+    difficulty,
+    size,
+    pressure,
+    version: CHALLENGE_VERSION,
+    seed: (Math.imul(round, 3571) + CHALLENGE_VERSION * 104729) >>> 0,
+  };
+}
+export function createChallenge(level, selectedDifficulty) {
+  const definition = challengeDefinition(level, selectedDifficulty);
+  const { difficulty, size, pressure, version, seed } = definition;
   const profile = {
     difficulty,
     size,
@@ -356,11 +376,18 @@ export function createChallenge(level, selectedDifficulty) {
     chapter: null,
     label: `CHALLENGE / ${difficulty.toUpperCase()}`,
   };
-  const paths = packedPuzzle(level * 3571 + 17, profile),
+  const paths = packedPuzzle(seed, profile),
     metrics = challengeMetrics(paths, size);
-  // Budget for each deliberate tap, reading the initial board, and dependencies.
   const perArrow = { easy: 1.8, medium: 1.7, hard: 1.6 }[difficulty];
-  const timeLimit =
-    Math.ceil((8 + paths.length * perArrow + metrics.layers * 0.8) / 5) * 5;
-  return { paths, size, profile, timeLimit };
+  const ranges = { easy: [35, 60], medium: [60, 100], hard: [100, 150] };
+  const [minimum, maximum] = ranges[difficulty];
+  const reading =
+    6 + Math.max(0, paths.length / Math.max(1, metrics.initialExits) - 2) * 0.5;
+  const budget =
+    (reading + paths.length * perArrow + metrics.layers * 0.8) * (1 - pressure);
+  const timeLimit = Math.min(
+    maximum,
+    Math.max(minimum, Math.ceil(budget / 5) * 5),
+  );
+  return { paths, size, profile, timeLimit, version, seed };
 }

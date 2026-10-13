@@ -73,3 +73,9 @@ After deploying, add the `arrowout.xyz` Domain property in Google Search Console
 The server verifies the anonymous Auth token and existing room token before granting subscription membership. Browser clients can read only their own membership and cannot write room state or broadcast through this policy. Snapshots exclude all player tokens. Keep the other Realtime policies in the project appropriately restricted; permissive pre-existing policies can broaden access.
 
 Realtime removes the opponent's polling round trip; winning still requires server validation and therefore still depends on network/database latency. Live Supabase behavior requires configured credentials and cannot be verified by local builds alone.
+
+## Timed challenge rules (version 2)
+
+Each deterministic group of three rounds includes easy, medium and hard in a shuffled order. Sizes stay at 9/12/15; timers use arrow count, starting exits and blocking depth within easy 35�60s, medium 60�100s and hard 100�150s ranges. Every twelve rounds adds 3% time pressure, capped at 18%; minimum limits still apply. These initial ranges need playtesting.
+
+Results are stored locally under their rule version with the challenge seed, allowed time, completion time, hearts and hints used. Previous-version progress remains stored separately and does not count toward the new sequence. Local results are not trusted leaderboard submissions; a future leaderboard must validate attempts and timing on the server and compare matching versions.

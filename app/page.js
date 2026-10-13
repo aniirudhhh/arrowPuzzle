@@ -7,6 +7,8 @@ import {
   levelProfile,
   createDaily,
   createChallenge,
+  challengeDefinition,
+  CHALLENGE_VERSION,
 } from "../paths";
 import Icon from "./components/Icon";
 import { Board } from "./components/Board";
@@ -54,6 +56,16 @@ export default function Game() {
         ? createDaily(Number(stamp().replaceAll("-", "")))
         : null,
     [screen],
+  );
+  const challengeCompleted =
+    store.challengeProgress?.[CHALLENGE_VERSION]?.completed || [];
+  const nextChallenge = challengeCompleted.reduce(
+    (n, v) => Math.max(n, v + 1),
+    1,
+  );
+  const challengePreview = useMemo(
+    () => (screen === "challenge" ? createChallenge(nextChallenge) : null),
+    [screen, nextChallenge],
   );
   const todayResult = store.daily[stamp()];
   function currentStreak() {
@@ -148,7 +160,7 @@ export default function Game() {
     }
   }, [screen, game?.time, game?.challenge]);
   function start(level = 1, daily = false, resume = false, challenge = false) {
-    const { size, paths, profile, timeLimit } = challenge
+    const { size, paths, profile, timeLimit, version, seed } = challenge
       ? createChallenge(level)
       : daily
         ? createDaily(Number(stamp().replaceAll("-", "")))
@@ -160,6 +172,9 @@ export default function Game() {
             level,
             daily,
             challenge,
+            challengeVersion: challenge ? version : null,
+            challengeSeed: challenge ? seed : null,
+            hintsUsed: 0,
             timeLimit: challenge ? timeLimit : null,
             size,
             profile,
@@ -357,9 +372,34 @@ export default function Game() {
           game.challenge
             ? {
                 ...s,
-                challengeCompleted: [
-                  ...new Set([...(s.challengeCompleted || []), game.level]),
-                ],
+                challengeProgress: {
+                  ...s.challengeProgress,
+                  [game.challengeVersion]: {
+                    completed: [
+                      ...new Set([
+                        ...(s.challengeProgress?.[game.challengeVersion]
+                          ?.completed || []),
+                        game.level,
+                      ]),
+                    ],
+                    results: {
+                      ...s.challengeProgress?.[game.challengeVersion]?.results,
+                      [game.level]: [
+                        ...(s.challengeProgress?.[game.challengeVersion]
+                          ?.results?.[game.level] || []),
+                        {
+                          version: game.challengeVersion,
+                          challenge: game.level,
+                          seed: game.challengeSeed,
+                          timeLimit: game.timeLimit,
+                          completionTime: next.time,
+                          heartsRemaining: 3 - next.mistakes,
+                          hintsUsed: next.hintsUsed || 0,
+                        },
+                      ].slice(-10),
+                    },
+                  },
+                },
               }
             : game.daily
               ? {
@@ -393,6 +433,10 @@ export default function Game() {
     const choices = game.paths.filter((p) => isFree(p, game.paths, game.size));
     const p = choices.find((p) => p.id !== hint) || choices[0];
     if (p) {
+      setGame((current) => ({
+        ...current,
+        hintsUsed: (current.hintsUsed || 0) + 1,
+      }));
       setHint(p.id);
       setMessage(
         `Tap the bright gold arrow pointing ${p.d}. Its path is clear.`,
@@ -883,7 +927,8 @@ export default function Game() {
             </h1>
             <p className="subheading">
               Clear every path before time runs out. Each wrong tap costs a
-              heart. Time is calculated for each board.
+              heart. Difficulty is mixed between rounds, with a fair timer for
+              each board.
             </p>
             <div className="challenge-rules">
               {[
@@ -901,10 +946,7 @@ export default function Game() {
               className="primary"
               onClick={() =>
                 start(
-                  (store.challengeCompleted || []).reduce(
-                    (n, v) => Math.max(n, v + 1),
-                    1,
-                  ),
+                  challengeCompleted.reduce((n, v) => Math.max(n, v + 1), 1),
                   false,
                   false,
                   true,
@@ -914,11 +956,17 @@ export default function Game() {
               Start next challenge
               <Icon name="play" />
             </button>
+            {challengePreview && (
+              <p className="feedback">
+                Next: {challengePreview.profile.difficulty} �{" "}
+                {challengePreview.timeLimit} sec � 3 hearts
+              </p>
+            )}
             <div className="pack">
               <div className="level-grid">
                 {Array.from({ length: 8 }, (_, i) => {
                   const n =
-                    (store.challengeCompleted || []).reduce(
+                    challengeCompleted.reduce(
                       (max, v) => Math.max(max, v + 1),
                       1,
                     ) + i;
@@ -931,7 +979,7 @@ export default function Game() {
                       <span>
                         {n}
                         <small className="level-difficulty">
-                          {levelProfile(n).difficulty}
+                          {challengeDefinition(n).difficulty}
                         </small>
                       </span>
                       <Icon name="arrow" />
