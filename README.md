@@ -42,7 +42,8 @@ Local rooms persist in `.data/rooms.json`, which contains private room credentia
 2. In Supabase, choose **Connect > Transaction pooler** and copy the PostgreSQL URI (port `6543`). Replace the password placeholder with your database password, URL-encoding special characters. Use SSL (`sslmode=require`, or the verified SSL mode recommended for your database).
 3. Import this repository into Netlify. `netlify.toml` sets `npm run build` and `.next`; Netlify's Next.js adapter supplies the API functions.
 4. Add the URI as **DATABASE_URL** in Netlify's environment variables for the Functions runtime. Keep it secret; never use a `NEXT_PUBLIC_` prefix or commit it. Use a separate database/project for deploy previews, or disable multiplayer there to avoid mixing preview and production rooms.
-5. Deploy, then open the public URL in two separate browser profiles. Create/join a room, select difficulty, ready/start, finish, and request/accept a rematch.
+5. Download the database CA certificate from Supabase **Database Settings > SSL Configuration > Download Certificate**. Open it as text and save the complete PEM contents as **DATABASE_CA_CERT** in Netlify, scoped to Functions. Include the BEGIN/END CERTIFICATE lines. Actual newlines and literal `\n` separators are both supported. The app verifies the certificate and hostname using this CA; it overrides URI SSL flags to preserve verification.
+6. Deploy, then open the public URL in two separate browser profiles. Create/join a room, select difficulty, ready/start, finish, and request/accept a rematch.
 
 No Supabase anon key or browser database client is needed. Solo progress remains in browser storage. Without `DATABASE_URL`, local development uses the local file; a Netlify function reports multiplayer setup is incomplete instead of attempting filesystem writes.
 
