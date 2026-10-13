@@ -45,7 +45,7 @@ Local rooms persist in `.data/rooms.json`, which contains private room credentia
 5. Download the database CA certificate from Supabase **Database Settings > SSL Configuration > Download Certificate**. Open it as text and save the complete PEM contents as **DATABASE_CA_CERT** in Netlify, scoped to Functions. Include the BEGIN/END CERTIFICATE lines. Actual newlines and literal `\n` separators are both supported. The app verifies the certificate and hostname using this CA; it overrides URI SSL flags to preserve verification.
 6. Deploy, then open the public URL in two separate browser profiles. Create/join a room, select difficulty, ready/start, finish, and request/accept a rematch.
 
-No Supabase anon key or browser database client is needed. Solo progress remains in browser storage. Without `DATABASE_URL`, local development uses the local file; a Netlify function reports multiplayer setup is incomplete instead of attempting filesystem writes.
+The basic polling mode needs no Supabase browser key. Live updates use the public key described below. Solo progress remains in browser storage. Without `DATABASE_URL`, local development uses the local file; a Netlify function reports multiplayer setup is incomplete instead of attempting filesystem writes.
 
 For database integration checks, set `ARROW_TEST_DATABASE_URL` to a dedicated test database with the schema applied and run `node --test lib/race-store.test.js`. The live test creates its own rooms and removes them afterward. Without it, live database tests are skipped; a local build does not verify the deployed Supabase connection.
 
@@ -62,3 +62,14 @@ If multiline certificate pasting is altered by the environment editor, set `DATA
 The production site uses `https://arrowout.xyz` as its canonical origin. Metadata includes descriptions, social preview tags and an image, plus VideoGame structured data. The landing page links to the server-rendered `/how-to-play` guide. `/sitemap.xml` lists public content; `/robots.txt` excludes APIs. Netlify branch deploys and deploy previews are marked noindex.
 
 After deploying, add the `arrowout.xyz` Domain property in Google Search Console and verify the TXT record it supplies in Namecheap. Submit `https://arrowout.xyz/sitemap.xml`, then inspect the home page and request indexing. Alternatively, use a URL-prefix property and set its HTML-tag token as `GOOGLE_SITE_VERIFICATION` in Netlify's build environment before redeploying. These changes help discovery and understanding; Google controls whether and when pages are indexed and ranked.
+
+## Enable live Friends updates
+
+1. Run `supabase/realtime.sql` in the Supabase SQL Editor after the base schema.
+2. Enable Anonymous Sign-Ins in Supabase Authentication settings. Players use anonymous identities; they do not need a login form. Configure Auth rate limits and CAPTCHA for public traffic as appropriate.
+3. In Netlify, add `NEXT_PUBLIC_SUPABASE_URL` (your Supabase project URL) and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (the publishable key, never a secret/service-role key). Both need Build and Functions scope. Redeploy so the browser bundle receives them.
+4. Create a new room in two separate browser profiles. The connection label should show **Live**. Server-confirmed moves, hearts, results and rematch events arrive through private Supabase Broadcast channels. Polling remains as a fallback and a five-second heartbeat.
+
+The server verifies the anonymous Auth token and existing room token before granting subscription membership. Browser clients can read only their own membership and cannot write room state or broadcast through this policy. Snapshots exclude all player tokens. Keep the other Realtime policies in the project appropriately restricted; permissive pre-existing policies can broaden access.
+
+Realtime removes the opponent's polling round trip; winning still requires server validation and therefore still depends on network/database latency. Live Supabase behavior requires configured credentials and cannot be verified by local builds alone.

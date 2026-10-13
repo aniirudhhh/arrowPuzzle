@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { Board } from "./Board";
 import Icon from "./Icon";
 import { isFree } from "../../paths.js";
+import { subscribeToRace } from "../../lib/race-live.js";
 export default function Multiplayer({
   onSlide,
   onImpact,
@@ -20,17 +21,22 @@ export default function Multiplayer({
     [active, setActive] = useState(null),
     [savedRoom, setSavedRoom] = useState(null),
     [connection, setConnection] = useState("connecting"),
-    [syncCount, setSyncCount] = useState(0);
+    [syncCount, setSyncCount] = useState(0),
+    [live, setLive] = useState(false);
   const auth = useRef(null),
     busy = useRef(false),
     offset = useRef(0),
     animationLock = useRef(false),
-    moveQueue = useRef(Promise.resolve()),
+    moveQueue = useRef([]),
+    processingMoves = useRef(false),
     queuedMoves = useRef(0),
     queueVersion = useRef(0),
     polling = useRef(false),
     recovering = useRef(false),
-    sessionVersion = useRef(0);
+    sessionVersion = useRef(0),
+    liveConnected = useRef(false),
+    latestRevision = useRef(0),
+    lastPoll = useRef(0);
   function clearSession() {
     sessionVersion.current++;
     auth.current = null;
@@ -38,6 +44,7 @@ export default function Multiplayer({
     try {
       sessionStorage.removeItem("arrow-race");
     } catch {}
+    latestRevision.current = 0;
     setRoom(null);
     setActive(null);
   }
@@ -94,6 +101,7 @@ export default function Multiplayer({
       const next = await call(type, extra);
       if (type === "leave") clearSession();
       else {
+        latestRevision.current = next.revision ?? 0;
         setRoom(next);
         setSavedRoom(null);
         recovering.current = false;
@@ -121,13 +129,26 @@ export default function Multiplayer({
     window.addEventListener("offline", offline);
     const timer = setInterval(async () => {
       setTick(Date.now());
-      if (!auth.current || busy.current || polling.current || !navigator.onLine)
+      if (
+        !auth.current ||
+        busy.current ||
+        polling.current ||
+        !navigator.onLine ||
+        (liveConnected.current && Date.now() - lastPoll.current < 5000)
+      )
         return;
       polling.current = true;
+      lastPoll.current = Date.now();
       const version = sessionVersion.current;
       try {
         const next = await call("poll");
-        if (!cancelled && !busy.current && version === sessionVersion.current) {
+        if (
+          !cancelled &&
+          !busy.current &&
+          version === sessionVersion.current &&
+          (next.revision ?? 0) >= latestRevision.current
+        ) {
+          latestRevision.current = next.revision ?? 0;
           setRoom(next);
           recovering.current = false;
           setError("");
@@ -149,6 +170,58 @@ export default function Multiplayer({
       window.removeEventListener("offline", offline);
     };
   }, []);
+  useEffect(() => {
+    if (!room?.code || !auth.current) return;
+    let cancelled = false,
+      unsubscribe;
+    subscribeToRace(
+      auth.current,
+      (snapshot) => {
+        if (cancelled || snapshot.revision <= latestRevision.current) return;
+        latestRevision.current = snapshot.revision;
+        if (snapshot.phase === "finished") {
+          queueVersion.current++;
+          setActive(null);
+          setRoom(snapshot);
+        } else {
+          setRoom((current) => {
+            if (!current || current.code !== snapshot.code) return current;
+            if (queuedMoves.current)
+              return {
+                ...snapshot,
+                paths: current.paths,
+                players: snapshot.players.map((p) =>
+                  p.you ? current.players.find((q) => q.you) : p,
+                ),
+              };
+            return snapshot;
+          });
+        }
+      },
+      (connected) => {
+        if (!cancelled) {
+          liveConnected.current = connected;
+          setLive(connected);
+        }
+      },
+    )
+      .then((cleanup) => {
+        if (cancelled) cleanup();
+        else unsubscribe = cleanup;
+      })
+      .catch(() => {
+        if (!cancelled) {
+          liveConnected.current = false;
+          setLive(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+      liveConnected.current = false;
+      setLive(false);
+      unsubscribe?.();
+    };
+  }, [room?.code]);
   const celebrated = useRef(null);
   useEffect(() => {
     if (
@@ -236,34 +309,55 @@ export default function Multiplayer({
         reduced ? 0 : 650,
       ),
     );
-    // Keep requests ordered while allowing the next tap after its animation.
-    moveQueue.current = moveQueue.current
-      .then(async () => {
-        if (version !== queueVersion.current) return;
+    moveQueue.current.push({ id: path.id, requestId, animation, version });
+    processMoves();
+  }
+  async function processMoves() {
+    if (processingMoves.current) return;
+    processingMoves.current = true;
+    try {
+      while (moveQueue.current.length) {
+        const batch = moveQueue.current.splice(0, 16);
         try {
-          const next = await call("move", { id: path.id, requestId });
-          await animation;
-          if (queuedMoves.current === 1 && version === queueVersion.current)
+          if (batch[0].version !== queueVersion.current) continue;
+          const next = await call("moves", {
+            moves: batch.map(({ id, requestId }) => ({ id, requestId })),
+          });
+          await Promise.all(batch.map((item) => item.animation));
+          if (
+            !moveQueue.current.length &&
+            batch[0].version === queueVersion.current &&
+            (next.revision ?? 0) >= latestRevision.current
+          ) {
+            latestRevision.current = next.revision ?? 0;
             setRoom(next);
+          }
         } catch (error) {
+          if (batch[0].version !== queueVersion.current) continue;
           recovering.current = true;
           setConnection("reconnecting");
           queueVersion.current++;
-          await animation;
+          await Promise.all(batch.map((item) => item.animation));
           setError(error.message);
+          const discarded = moveQueue.current.splice(0);
+          queuedMoves.current -= discarded.length;
           if (auth.current) {
             try {
-              setRoom(await call("poll"));
+              const next = await call("poll");
+              latestRevision.current = next.revision ?? 0;
+              setRoom(next);
               recovering.current = false;
             } catch {}
           }
+        } finally {
+          queuedMoves.current -= batch.length;
+          setSyncCount(queuedMoves.current);
         }
-      })
-      .finally(() => {
-        queuedMoves.current--;
-        setSyncCount(queuedMoves.current);
-        if (!queuedMoves.current) busy.current = false;
-      });
+      }
+    } finally {
+      processingMoves.current = false;
+      if (!queuedMoves.current) busy.current = false;
+    }
   }
   const me = room?.players.find((p) => p.you),
     guest = room?.players.find((p) => !p.host);
@@ -393,7 +487,9 @@ export default function Multiplayer({
               {connection === "connected"
                 ? syncCount
                   ? `Syncing ${syncCount} move${syncCount === 1 ? "" : "s"}...`
-                  : "Connected"
+                  : live
+                    ? "Live"
+                    : "Connected"
                 : connection === "offline"
                   ? "Offline - moves paused"
                   : "Reconnecting - moves paused"}

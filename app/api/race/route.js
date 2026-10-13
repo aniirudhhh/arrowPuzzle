@@ -12,6 +12,7 @@ export async function POST(request) {
         "difficulty",
         "start",
         "move",
+        "moves",
         "rematch",
         "accept-rematch",
         "decline-rematch",

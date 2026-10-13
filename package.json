@@ -13,6 +13,7 @@
   "dependencies": {
     "@hugeicons/core-free-icons": "^4.3.5",
     "@hugeicons/react": "^1.1.10",
+    "@supabase/supabase-js": "^2.117.3",
     "next": "^16.4.0",
     "pg": "^8.23.1",
     "react": "^19.3.0",
