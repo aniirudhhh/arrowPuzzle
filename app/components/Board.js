@@ -154,6 +154,8 @@ export function Board({
   hint,
   decorative = false,
 }) {
+  const touchStart = useRef(null),
+    lastTouch = useRef(0);
   const unit = 40,
     offset = 26,
     extent = (size - 1) * unit + offset * 2;
@@ -173,7 +175,7 @@ export function Board({
           fill="#34404d"
         />
       ))}
-      {paths.map((p, i) => {
+      {paths.map((p) => {
         const pts = p.cells.slice().reverse(),
           [x, y] = p.cells[0],
           angles = { right: 0, down: 90, left: 180, up: 270 };
@@ -186,7 +188,7 @@ export function Board({
         return (
           <g
             key={p.id}
-            className={`puzzle-path tone-${i % 5} ${active?.id === p.id ? active.type : ""} ${hint === p.id ? "hinted" : ""}`}
+            className={`puzzle-path tone-${p.id % 5} ${active?.id === p.id ? active.type : ""} ${hint === p.id ? "hinted" : ""}`}
             style={{
               "--tx":
                 p.d === "right" ? "650px" : p.d === "left" ? "-650px" : "0px",
@@ -196,7 +198,39 @@ export function Board({
             tabIndex={decorative ? undefined : 0}
             role={decorative ? undefined : "button"}
             aria-label={`Path ${p.id + 1}, points ${p.d}. Activate to escape.`}
-            onClick={() => !decorative && onMove(p)}
+            onPointerDown={(e) => {
+              if (e.pointerType !== "mouse")
+                touchStart.current = {
+                  id: e.pointerId,
+                  x: e.clientX,
+                  y: e.clientY,
+                };
+            }}
+            onPointerCancel={() => {
+              touchStart.current = null;
+            }}
+            onPointerUp={(e) => {
+              const start = touchStart.current;
+              touchStart.current = null;
+              if (
+                decorative ||
+                e.pointerType === "mouse" ||
+                start?.id !== e.pointerId
+              )
+                return;
+              lastTouch.current = Date.now();
+              if (Math.hypot(e.clientX - start.x, e.clientY - start.y) > 10)
+                return;
+              e.preventDefault();
+              onMove(p);
+            }}
+            onClick={(e) => {
+              if (
+                !decorative &&
+                (e.detail === 0 || Date.now() - lastTouch.current > 800)
+              )
+                onMove(p);
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();

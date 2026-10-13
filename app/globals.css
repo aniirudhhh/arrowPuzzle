@@ -323,7 +323,6 @@ h1 em {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.puzzle-path:hover,
 .puzzle-path:focus-visible,
 .hinted {
   color: var(--cyan);
@@ -4183,4 +4182,14 @@ main:has(.daily-experience) {
 .room-leave-actions + p {
   margin-top: 12px;
   font-size: 12px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .puzzle-path:hover {
+    color: var(--cyan);
+    filter: drop-shadow(0 0 5px #67ddf548);
+  }
+}
+.puzzle-path {
+  touch-action: manipulation;
 }
