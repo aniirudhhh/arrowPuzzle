@@ -105,19 +105,23 @@ export default function ChallengeLeaderboard({
             (rankedState?.status === "completed"
               ? rankedState.attempt.eligible
                 ? "Verified finish. Your best run is ranked."
-                : "Practice finish � paused runs aren�t ranked."
-              : "Verifying your finish�")}
+                : "Practice finish. Paused runs are unranked."
+              : rankedState?.status === "expired"
+                ? "Time expired before verification. This run is unranked."
+                : rankedState?.status === "lost"
+                  ? "No hearts remaining. This run is unranked."
+                  : "Verifying your finish...")}
         </p>
       )}
       {error ? (
         <p role="status">{error}</p>
       ) : !board ? (
-        <p role="status">Loading scores�</p>
+        <p role="status">Loading scores...</p>
       ) : (
         <>
           <p className="leaderboard-own">
             {own
-              ? `Your rank: #${own.rank} � ${time(own.duration_ms)} � ${own.hearts} hearts`
+              ? `Your rank: #${own.rank} | ${time(own.duration_ms)} | ${own.hearts} hearts`
               : "No ranked result in this category yet."}
           </p>
           {board.entries.length === 0 ? (
@@ -140,7 +144,7 @@ export default function ChallengeLeaderboard({
                     <span className="leaderboard-score">
                       {time(entry.duration_ms)}
                       <small>
-                        {entry.hearts} hearts � {entry.hints} hints
+                        {entry.hearts} hearts | {entry.hints} hints
                       </small>
                     </span>
                   </li>
@@ -163,7 +167,7 @@ export default function ChallengeLeaderboard({
                   localStorage.setItem("arrow-nickname", e.target.value);
                 } catch {}
               }}
-              placeholder="2�24 characters"
+              placeholder="2-24 characters"
               autoComplete="nickname"
             />
           </label>
@@ -172,7 +176,7 @@ export default function ChallengeLeaderboard({
             disabled={busy || nickname.trim().length < 2 || !!error || !board}
             onClick={() => onPlay(selected, nickname.trim())}
           >
-            {busy ? "Preparing challenge�" : "Play ranked"}
+            {busy ? "Preparing challenge..." : "Play ranked"}
           </button>
           <p>
             Anonymous profile saved in this browser. Pausing makes the run

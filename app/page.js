@@ -45,6 +45,8 @@ export default function Game() {
     menuPanel = useRef(null),
     latestGame = useRef(null);
   const ranked = useRankedChallenge();
+  const currentScreen = useRef(screen);
+  currentScreen.current = screen;
   latestGame.current = game;
   useEffect(() => {
     if (screen === "pause" && game?.ranked) ranked.event("pause");
@@ -173,10 +175,15 @@ export default function Game() {
     rankedPlay = false,
     nickname = "",
   ) {
+    const originScreen = screen;
     let attempt = null;
     if (rankedPlay) {
       attempt = await ranked.begin(level, nickname);
       if (!attempt) return;
+      if (currentScreen.current !== originScreen) {
+        ranked.reset();
+        return;
+      }
     } else ranked.reset();
     const { size, paths, profile, timeLimit, version, seed } = challenge
       ? createChallenge(level)
@@ -1002,8 +1009,8 @@ export default function Game() {
             </button>
             {challengePreview && (
               <p className="feedback">
-                Next: {challengePreview.profile.difficulty} �{" "}
-                {challengePreview.timeLimit} sec � 3 hearts
+                Next: {challengePreview.profile.difficulty} |{" "}
+                {challengePreview.timeLimit} sec | 3 hearts
               </p>
             )}
             <div className="pack">

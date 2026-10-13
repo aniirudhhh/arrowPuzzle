@@ -20,6 +20,7 @@
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.9",
     "postcss": "^8.5.30",
     "prettier": "^3.9.10"
   }
