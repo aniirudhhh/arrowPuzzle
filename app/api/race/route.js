@@ -24,7 +24,7 @@ export async function POST(request) {
     });
   } catch (error) {
     return Response.json(
-      { error: error.message, code: error.code },
+      { error: error.message, code: error.code, reason: error.reason },
       {
         status:
           error.code === "ROOM_NOT_FOUND"
