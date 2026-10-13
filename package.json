@@ -1,0 +1,24 @@
+{
+  "name": "arrow-out",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --hostname 127.0.0.1 --port 5173",
+    "build": "next build",
+    "start": "next start --hostname 127.0.0.1 --port 5173",
+    "test": "node --test paths.test.js",
+    "format": "prettier --write app paths.js paths.test.js package.json README.md",
+    "format:check": "prettier --check app paths.js paths.test.js package.json README.md"
+  },
+  "dependencies": {
+    "@hugeicons/core-free-icons": "^4.3.5",
+    "@hugeicons/react": "^1.1.10",
+    "next": "^16.4.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "postcss": "^8.5.30",
+    "prettier": "^3.9.10"
+  }
+}
