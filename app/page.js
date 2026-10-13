@@ -11,6 +11,7 @@ import {
 import Icon from "./components/Icon";
 import { Board, FlowingArrow } from "./components/Board";
 import Multiplayer from "./components/Multiplayer";
+import Link from "next/link";
 const initial = {
   completed: [],
   sound: false,
@@ -414,6 +415,28 @@ export default function Game() {
     <div
       className={`app-shell ${screen === "home" ? "is-home" : ""} ${store.reduced ? "reduced" : ""}`}
     >
+      {screen === "home" && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "VideoGame",
+              name: "ArrowOut",
+              alternateName: "ARROW//OUT",
+              url: "https://arrowout.xyz/",
+              description:
+                "A free online arrow escape puzzle with endless levels, daily challenges, timed challenges, and two-player races.",
+              genre: "Puzzle",
+              gamePlatform: "Web browser",
+              playMode: ["SinglePlayer", "MultiPlayer"],
+              isAccessibleForFree: true,
+              inLanguage: "en",
+              image: "https://arrowout.xyz/opengraph-image",
+            }),
+          }}
+        />
+      )}
       <header>
         <button className="wordmark" onClick={() => setScreen("home")}>
           ARROW<span>//</span>OUT <Icon name="arrow" />
@@ -631,6 +654,13 @@ export default function Game() {
                 </span>
               </h1>
               <p className="title-tagline">Think. Tap. Escape.</p>
+              <p className="title-description">
+                A free online arrow puzzle. Endless levels, daily challenges,
+                and races with friends.
+              </p>
+              <Link className="how-to-link" href="/how-to-play">
+                How to play
+              </Link>
               <div className="title-actions">
                 <button
                   className="primary title-play"

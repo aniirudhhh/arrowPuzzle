@@ -1,7 +1,47 @@
 import "./globals.css";
+const siteUrl = "https://arrowout.xyz";
+const description =
+  "Play ArrowOut, a free online arrow puzzle game. Clear tangled paths, explore endless levels, solve daily and timed challenges, or race a friend.";
 export const metadata = {
-  title: "ARROW//OUT — Find your way out",
-  description: "A moment of focus. A satisfying arrow escape puzzle.",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "ArrowOut - Free Online Arrow Puzzle Game",
+    template: "%s | ArrowOut",
+  },
+  description,
+  applicationName: "ArrowOut",
+  alternates: { canonical: "/" },
+  robots: {
+    index:
+      process.env.CONTEXT !== "deploy-preview" &&
+      process.env.CONTEXT !== "branch-deploy",
+    follow: true,
+  },
+  openGraph: {
+    title: "ArrowOut - Free Online Arrow Puzzle Game",
+    description,
+    url: siteUrl,
+    siteName: "ArrowOut",
+    type: "website",
+    locale: "en_US",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "ArrowOut - Think. Tap. Escape.",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ArrowOut - Free Online Arrow Puzzle Game",
+    description,
+    images: ["/opengraph-image"],
+  },
+  verification: process.env.GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.GOOGLE_SITE_VERIFICATION }
+    : undefined,
 };
 export default function Layout({ children }) {
   return (

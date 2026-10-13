@@ -56,3 +56,9 @@ Expired rooms cannot be accessed. Schedule `DELETE FROM public.arrow_rooms WHERE
 Production builds and automated puzzle checks are available. Browser automation cannot access this local preview under its URL policy; mobile layouts, animation, and audio need manual review. Shared database integration requires a configured test database.
 
 If multiline certificate pasting is altered by the environment editor, set `DATABASE_CA_CERT_BASE64` to the base64 encoding of the entire PEM file instead. This single-line value takes precedence over `DATABASE_CA_CERT` and preserves certificate verification.
+
+## Search discovery
+
+The production site uses `https://arrowout.xyz` as its canonical origin. Metadata includes descriptions, social preview tags and an image, plus VideoGame structured data. The landing page links to the server-rendered `/how-to-play` guide. `/sitemap.xml` lists public content; `/robots.txt` excludes APIs. Netlify branch deploys and deploy previews are marked noindex.
+
+After deploying, add the `arrowout.xyz` Domain property in Google Search Console and verify the TXT record it supplies in Namecheap. Submit `https://arrowout.xyz/sitemap.xml`, then inspect the home page and request indexing. Alternatively, use a URL-prefix property and set its HTML-tag token as `GOOGLE_SITE_VERIFICATION` in Netlify's build environment before redeploying. These changes help discovery and understanding; Google controls whether and when pages are indexed and ranked.

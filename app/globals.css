@@ -4040,3 +4040,72 @@ main:has(.daily-experience) {
   font-size: 9px;
   margin-left: 6px;
 }
+.title-description {
+  max-width: 360px;
+  margin: 8px auto;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.how-to-link {
+  color: var(--muted);
+  font-size: 11px;
+  text-underline-offset: 4px;
+}
+.how-to-link:hover {
+  color: var(--cyan);
+}
+.play-guide {
+  max-width: 760px;
+  padding: 32px 24px 60px;
+  margin: auto;
+  color: var(--text);
+  line-height: 1.8;
+}
+.guide-brand {
+  color: var(--cyan);
+  font-weight: 700;
+  text-decoration: none;
+}
+.play-guide h1 {
+  font:
+    600 clamp(28px, 6vw, 44px) Outfit,
+    sans-serif;
+  line-height: 1.2;
+  margin: 32px 0 20px;
+}
+.play-guide h2 {
+  font:
+    600 24px Outfit,
+    sans-serif;
+  margin: 32px 0 12px;
+}
+.play-guide p,
+.play-guide li {
+  color: var(--muted);
+  font-size: 14px;
+}
+.play-guide li {
+  margin-bottom: 8px;
+}
+.guide-play {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 12px 22px;
+  border-radius: 8px;
+  background: var(--cyan);
+  color: var(--bg);
+  text-decoration: none;
+  font-weight: 600;
+}
+@media (max-width: 480px), (max-height: 650px) {
+  .title-description {
+    font-size: 10px;
+    line-height: 1.4;
+    margin: 6px auto;
+    max-width: 290px;
+  }
+  .how-to-link {
+    font-size: 10px;
+  }
+}
