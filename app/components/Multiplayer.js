@@ -327,7 +327,7 @@ export default function Multiplayer({
             </aside>
             <div className="race-center">
               <div className="race-difficulty-label">
-                {room.difficulty} � Round {room.round}
+                {room.difficulty} | Round {room.round}
               </div>
               {room.phase === "lobby" &&
                 me?.host &&
@@ -389,7 +389,7 @@ export default function Multiplayer({
                       </div>
                     </div>
                   ) : me?.rematch ? (
-                    <p>Rematch request sent. Waiting for your friend�</p>
+                    <p>Rematch request sent. Waiting for your friend...</p>
                   ) : (
                     <>
                       <button
