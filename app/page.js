@@ -452,10 +452,7 @@ export default function Game() {
             className={screen === "daily" ? "selected" : ""}
             onClick={() => setScreen("daily")}
           >
-            Daily Challenge{" "}
-            <span className="purple">
-              <Icon name="sparkles" />
-            </span>
+            Daily Challenge
           </button>
           <button onClick={() => setScreen("multiplayer")}>Friends</button>
           <button onClick={() => setScreen("challenge")}>Challenge</button>
@@ -671,6 +668,12 @@ export default function Game() {
                   <span className="play-arrow">
                     <Icon name="arrow" />
                   </span>
+                </button>
+                <button
+                  className="friend-cta"
+                  onClick={() => setScreen("multiplayer")}
+                >
+                  Play with a friend <Icon name="arrow" />
                 </button>
                 <button
                   className="daily-link"
