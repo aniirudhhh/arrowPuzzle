@@ -4261,3 +4261,69 @@ header .wordmark {
     display: grid;
   }
 }
+
+/* Keep the home actions compact and give the supporting copy room to breathe. */
+.title-content .title-tagline {
+  margin: 24px 0 14px;
+}
+.title-content .title-description {
+  margin: 0 auto;
+  padding: 0 8px;
+}
+.title-content .how-to-link {
+  display: inline-block;
+  margin: 14px 0 22px;
+}
+.title-content .title-actions {
+  width: min(280px, 100%);
+  margin: 0 auto;
+  gap: 12px;
+}
+.title-actions .title-play,
+.title-actions .friend-cta {
+  width: 100%;
+  min-width: 0;
+  min-height: 52px;
+  margin: 0;
+  padding: 13px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+.title-actions .friend-cta {
+  justify-content: center;
+  position: relative;
+  padding-right: 42px;
+  padding-left: 42px;
+}
+.title-actions .friend-cta svg {
+  position: absolute;
+  right: 18px;
+}
+.title-actions .daily-link {
+  padding: 8px 12px;
+  min-height: 36px;
+}
+.title-content .title-progress {
+  margin-top: 24px;
+}
+@media (max-width: 700px) {
+  .title-content .title-tagline {
+    margin: 18px 0 12px;
+  }
+  .title-content .how-to-link {
+    margin: 12px 0 18px;
+  }
+  .title-content .title-actions {
+    gap: 10px;
+  }
+  .title-actions .title-play,
+  .title-actions .friend-cta {
+    min-height: 44px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    font-size: 13px;
+  }
+  .title-content .title-progress {
+    margin-top: 18px;
+  }
+}
