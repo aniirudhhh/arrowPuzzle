@@ -4632,3 +4632,8 @@ input::placeholder {
   -webkit-user-select: none;
   -webkit-touch-callout: none;
 }
+
+.puzzle-path.escaping {
+  filter: none;
+  transition: none;
+}

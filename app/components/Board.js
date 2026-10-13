@@ -1,5 +1,6 @@
 "use client";
 import { useRef, useEffect, useState } from "react";
+import { arrowGeometry } from "../../lib/arrow-geometry";
 export function FlowingArrow({
   route,
   length = 46,
@@ -8,32 +9,22 @@ export function FlowingArrow({
   escape = false,
   onMove,
 }) {
-  const guide = useRef(null),
-    body = useRef(null),
+  const body = useRef(null),
     head = useRef(null);
   useEffect(() => {
     let frame;
-    const path = guide.current,
-      total = path.getTotalLength();
+    const geometry = arrowGeometry(route),
+      total = geometry.total;
     let origin;
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
     const draw = (distance) => {
       const end = Math.min(total, distance),
         start = Math.max(0, distance - length);
-      const points = [];
-      for (let t = start; t < end; t += 3) {
-        const p = path.getPointAtLength(t);
-        points.push(`${points.length ? "L" : "M"}${p.x} ${p.y}`);
-      }
-      const p = path.getPointAtLength(end);
-      points.push(`${points.length ? "L" : "M"}${p.x} ${p.y}`);
-      body.current.setAttribute("d", points.join(" "));
-      const before = path.getPointAtLength(Math.max(0, end - 1));
-      const angle =
-        (Math.atan2(p.y - before.y, p.x - before.x) * 180) / Math.PI;
+      const segment = geometry.slice(start, end);
+      body.current.setAttribute("d", segment.d);
       head.current.setAttribute(
         "transform",
-        `translate(${p.x} ${p.y}) rotate(${angle})`,
+        `translate(${segment.x} ${segment.y}) rotate(${segment.angle})`,
       );
     };
     const tick = (now) => {
@@ -54,7 +45,6 @@ export function FlowingArrow({
   }, [route, length, duration, delay, escape]);
   return (
     <g className={escape ? "flow-escape" : "ambient-flex"} onClick={onMove}>
-      <path ref={guide} d={route} fill="none" stroke="none" />
       <path ref={body} className="visible-path" />
       <path ref={head} d="m-10-8 10 8-10 8" className="visible-path" />
     </g>

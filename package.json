@@ -6,7 +6,7 @@
     "dev": "next dev --hostname 127.0.0.1 --port 5173",
     "build": "next build",
     "start": "next start --hostname 127.0.0.1 --port 5173",
-    "test": "node --test paths.test.js lib/race.test.js lib/race-store.test.js lib/challenge.test.js",
+    "test": "node --test paths.test.js lib/race.test.js lib/race-store.test.js lib/challenge.test.js lib/arrow-geometry.test.js",
     "format": "prettier --write app lib paths.js paths.test.js package.json README.md",
     "format:check": "prettier --check app lib paths.js paths.test.js package.json README.md"
   },
