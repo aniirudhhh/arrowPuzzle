@@ -4637,3 +4637,22 @@ input::placeholder {
   filter: none;
   transition: none;
 }
+.page-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 12px;
+  margin-bottom: 24px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 14px;
+}
+.page-back:hover {
+  background: var(--prussian-blue);
+}
+.page-back svg {
+  width: 20px;
+  height: 20px;
+}

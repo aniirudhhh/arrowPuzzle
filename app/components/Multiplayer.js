@@ -2,9 +2,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Board } from "./Board";
 import Icon from "./Icon";
+import PageBack from "./PageBack";
 import { isFree } from "../../paths.js";
 import { subscribeToRace } from "../../lib/race-live.js";
 export default function Multiplayer({
+  onBack,
   onSlide,
   onImpact,
   onWin,
@@ -422,6 +424,7 @@ export default function Multiplayer({
     <section
       className={`friends-screen ${room ? "in-race" : ""} ${room && room.phase !== "lobby" ? "race-active" : ""}`}
     >
+      {!room && <PageBack onClick={onBack} />}
       <div className="kicker">TWO PLAYERS. ONE WAY OUT.</div>
       <h1>
         Race a friend<span>.</span>

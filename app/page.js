@@ -15,6 +15,7 @@ import { Board } from "./components/Board";
 import Multiplayer from "./components/Multiplayer";
 import HomeAtmosphere from "./components/HomeAtmosphere";
 import Link from "next/link";
+import PageBack from "./components/PageBack";
 const initial = {
   completed: [],
   sound: false,
@@ -621,6 +622,7 @@ export default function Game() {
       <main key={screen}>
         {screen === "multiplayer" ? (
           <Multiplayer
+            onBack={() => setScreen("home")}
             onSlide={slideSound}
             onImpact={impactSound}
             onWin={victorySound}
@@ -851,6 +853,7 @@ export default function Game() {
           </section>
         ) : screen === "levels" ? (
           <section className="collection">
+            <PageBack onClick={() => setScreen("home")} />
             <div className="kicker">THE ENDLESS JOURNEY</div>
             <h1>
               Your way forward<span>.</span>
@@ -930,6 +933,7 @@ export default function Game() {
           </section>
         ) : screen === "challenge" ? (
           <section className="collection challenge-selection">
+            <PageBack onClick={() => setScreen("home")} />
             <div className="kicker">THREE HEARTS. ONE CLOCK.</div>
             <h1>
               Beat the clock<span>.</span>
@@ -1001,6 +1005,7 @@ export default function Game() {
         ) : screen === "daily" ? (
           <section className="daily-experience">
             <div className="daily-intro">
+              <PageBack onClick={() => setScreen("home")} />
               <div className="daily-date">
                 <Icon name="sparkles" />
                 <span>
