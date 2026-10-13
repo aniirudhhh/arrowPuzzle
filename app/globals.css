@@ -4493,3 +4493,34 @@ label,
     font-size: 15px;
   }
 }
+
+.title-content .game-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  font-size: clamp(28px, 8.4vw, 92px);
+  letter-spacing: -0.05em;
+  line-height: 1.05;
+}
+.title-content .game-title .title-slashes {
+  margin-left: 0;
+  letter-spacing: -0.08em;
+}
+.title-content .title-out {
+  display: inline-flex;
+  justify-content: initial;
+  margin-top: 0;
+}
+.title-content .title-out svg {
+  width: 0.55em;
+  height: 0.55em;
+  margin-left: 0.18em;
+  flex-shrink: 0;
+}
+@media (max-width: 700px) {
+  .title-content .game-title {
+    font-size: clamp(24px, 8.5vw, 56px);
+    letter-spacing: -0.055em;
+  }
+}

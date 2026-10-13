@@ -600,7 +600,6 @@ export default function Game() {
               </div>
               <h1 className="game-title">
                 ARROW<span className="title-slashes">//</span>
-                <br />
                 <span className="title-out">
                   OUT
                   <Icon name="arrow" />
