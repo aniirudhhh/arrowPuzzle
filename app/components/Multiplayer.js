@@ -17,36 +17,71 @@ export default function Multiplayer({
     [error, setError] = useState(""),
     [pending, setPending] = useState(false),
     [tick, setTick] = useState(Date.now()),
-    [active, setActive] = useState(null);
+    [active, setActive] = useState(null),
+    [savedRoom, setSavedRoom] = useState(null),
+    [connection, setConnection] = useState("connecting"),
+    [syncCount, setSyncCount] = useState(0);
   const auth = useRef(null),
     busy = useRef(false),
     offset = useRef(0),
     animationLock = useRef(false),
     moveQueue = useRef(Promise.resolve()),
     queuedMoves = useRef(0),
-    queueVersion = useRef(0);
-  async function call(action, extra = {}) {
-    const response = await fetch("/api/race", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action, ...auth.current, ...extra }),
-    });
-    const data = await response.json();
-    if (!response.ok) {
-      if (data.code === "ROOM_NOT_FOUND") {
-        auth.current = null;
-        try {
-          sessionStorage.removeItem("arrow-race");
-        } catch {}
-        setRoom(null);
-        setActive(null);
-      }
-      throw Error(data.error);
-    }
-    auth.current = { code: data.room.code, token: data.token };
+    queueVersion = useRef(0),
+    polling = useRef(false),
+    recovering = useRef(false),
+    sessionVersion = useRef(0);
+  function clearSession() {
+    sessionVersion.current++;
+    auth.current = null;
+    setSavedRoom(null);
     try {
-      sessionStorage.setItem("arrow-race", JSON.stringify(auth.current));
+      sessionStorage.removeItem("arrow-race");
     } catch {}
+    setRoom(null);
+    setActive(null);
+  }
+  async function call(action, extra = {}) {
+    const version = sessionVersion.current;
+    let response;
+    try {
+      response = await fetch("/api/race", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, ...auth.current, ...extra }),
+        signal: AbortSignal.timeout(10000),
+      });
+    } catch {
+      if (version !== sessionVersion.current) throw Error("Session changed.");
+      setConnection(navigator.onLine ? "reconnecting" : "offline");
+      throw Error(
+        "Connection interrupted. Waiting to reconnect and sync your board.",
+      );
+    }
+    if (version !== sessionVersion.current) throw Error("Session changed.");
+    let data;
+    try {
+      data = await response.json();
+    } catch {
+      setConnection("reconnecting");
+      throw Error("The server could not respond. Reconnecting...");
+    }
+    if (version !== sessionVersion.current) throw Error("Session changed.");
+    if (!response.ok) {
+      if (["ROOM_NOT_FOUND", "PLAYER_NOT_FOUND"].includes(data.code)) {
+        clearSession();
+        setError(data.error);
+      }
+      if (response.status >= 500) setConnection("reconnecting");
+      throw Error(data.error || "Could not complete the room request.");
+    }
+    setConnection("connected");
+    auth.current = { code: data.room.code, token: data.token };
+    if (action !== "leave") {
+      try {
+        sessionStorage.setItem("arrow-race", JSON.stringify(auth.current));
+      } catch {}
+    }
     offset.current = data.room.serverNow - Date.now();
     return data.room;
   }
@@ -57,10 +92,11 @@ export default function Multiplayer({
     setError("");
     try {
       const next = await call(type, extra);
-      setRoom(type === "leave" ? null : next);
-      if (type === "leave") {
-        auth.current = null;
-        sessionStorage.removeItem("arrow-race");
+      if (type === "leave") clearSession();
+      else {
+        setRoom(next);
+        setSavedRoom(null);
+        recovering.current = false;
       }
     } catch (e) {
       setError(e.message);
@@ -71,22 +107,46 @@ export default function Multiplayer({
   }
   useEffect(() => {
     try {
-      auth.current = JSON.parse(sessionStorage.getItem("arrow-race") || "null");
+      const saved = JSON.parse(sessionStorage.getItem("arrow-race") || "null");
+      if (/^[A-F0-9]{6}$/.test(saved?.code) && typeof saved?.token === "string")
+        setSavedRoom(saved);
     } catch {}
     let cancelled = false;
+    const online = () => setConnection("reconnecting");
+    const offline = () => {
+      recovering.current = true;
+      setConnection("offline");
+    };
+    window.addEventListener("online", online);
+    window.addEventListener("offline", offline);
     const timer = setInterval(async () => {
       setTick(Date.now());
-      if (!auth.current || busy.current) return;
+      if (!auth.current || busy.current || polling.current || !navigator.onLine)
+        return;
+      polling.current = true;
+      const version = sessionVersion.current;
       try {
         const next = await call("poll");
-        if (!cancelled && !busy.current) setRoom(next);
+        if (!cancelled && !busy.current && version === sessionVersion.current) {
+          setRoom(next);
+          recovering.current = false;
+          setError("");
+        }
       } catch (e) {
-        if (!cancelled) setError(e.message);
+        if (!cancelled && version === sessionVersion.current) {
+          recovering.current = true;
+          setError(e.message);
+        }
+      } finally {
+        polling.current = false;
       }
-    }, 600);
+    }, 1000);
     return () => {
       cancelled = true;
+      sessionVersion.current++;
       clearInterval(timer);
+      window.removeEventListener("online", online);
+      window.removeEventListener("offline", offline);
     };
   }, []);
   const celebrated = useRef(null);
@@ -124,6 +184,8 @@ export default function Multiplayer({
   function move(path) {
     if (
       animationLock.current ||
+      recovering.current ||
+      connection !== "connected" ||
       room.phase !== "racing" ||
       room.players.find((p) => p.you)?.hearts === 0
     )
@@ -132,7 +194,9 @@ export default function Multiplayer({
     animationLock.current = true;
     busy.current = true;
     queuedMoves.current++;
+    setSyncCount(queuedMoves.current);
     const version = queueVersion.current;
+    const requestId = crypto.randomUUID();
     const escaped = isFree(path, room.paths, room.size);
     const reduced =
       reducedMotion || matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -177,23 +241,27 @@ export default function Multiplayer({
       .then(async () => {
         if (version !== queueVersion.current) return;
         try {
-          const next = await call("move", { id: path.id });
+          const next = await call("move", { id: path.id, requestId });
           await animation;
           if (queuedMoves.current === 1 && version === queueVersion.current)
             setRoom(next);
         } catch (error) {
+          recovering.current = true;
+          setConnection("reconnecting");
           queueVersion.current++;
           await animation;
           setError(error.message);
           if (auth.current) {
             try {
               setRoom(await call("poll"));
+              recovering.current = false;
             } catch {}
           }
         }
       })
       .finally(() => {
         queuedMoves.current--;
+        setSyncCount(queuedMoves.current);
         if (!queuedMoves.current) busy.current = false;
       });
   }
@@ -215,6 +283,33 @@ export default function Multiplayer({
           <p className="subheading">
             Share a room code. Ready up. First to clear the same puzzle wins.
           </p>
+          {savedRoom && (
+            <div className="rejoin-room" role="status">
+              <strong>Rejoin room {savedRoom.code}?</strong>
+              <p>Your previous match may still be active.</p>
+              <div>
+                <button
+                  className="primary"
+                  disabled={pending}
+                  onClick={() => {
+                    auth.current = savedRoom;
+                    action("poll");
+                  }}
+                >
+                  Rejoin
+                </button>
+                <button
+                  disabled={pending}
+                  onClick={() => {
+                    auth.current = savedRoom;
+                    action("leave");
+                  }}
+                >
+                  Leave saved room
+                </button>
+              </div>
+            </div>
+          )}
           <label>
             Your nickname
             <input
@@ -289,6 +384,29 @@ export default function Multiplayer({
               <span className="room-action-label">Leave</span>
             </button>
           </div>
+          <div
+            className={`race-connection ${connection}`}
+            role="status"
+            aria-live="polite"
+          >
+            <span>
+              {connection === "connected"
+                ? syncCount
+                  ? `Syncing ${syncCount} move${syncCount === 1 ? "" : "s"}...`
+                  : "Connected"
+                : connection === "offline"
+                  ? "Offline - moves paused"
+                  : "Reconnecting - moves paused"}
+            </span>
+            {connection !== "connected" && (
+              <button
+                disabled={pending || syncCount > 0}
+                onClick={() => action("poll")}
+              >
+                Reconnect
+              </button>
+            )}
+          </div>
           <div className="race-workspace">
             <aside className="race-sidebar">
               <div className="race-players">
@@ -297,6 +415,9 @@ export default function Multiplayer({
                     <strong>
                       {p.name}
                       {p.you ? " (you)" : ""}
+                      {p.connected === false && (
+                        <span className="player-offline">Offline</span>
+                      )}
                       <small className="host-badge">
                         {p.host ? "HOST" : "GUEST"}
                       </small>
@@ -341,7 +462,10 @@ export default function Multiplayer({
                   className="primary"
                   disabled={
                     pending ||
-                    (me?.host && (!guest?.ready || room.players.length !== 2))
+                    (me?.host &&
+                      (!guest?.ready ||
+                        guest?.connected === false ||
+                        room.players.length !== 2))
                   }
                   onClick={() => action(me?.host ? "start" : "ready")}
                 >

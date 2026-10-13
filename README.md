@@ -32,7 +32,7 @@ Fonts use Google Fonts with local fallbacks. Icons use the public Hugeicons pack
 
 ## Two-player races
 
-Open **Friends**, enter a nickname, and create a room. A second player joins with its six-character code. The host selects difficulty; the guest presses Ready, and the host starts the same puzzle after a three-second countdown. Changing difficulty resets readiness. The server validates moves, tracks three hearts per player, declares the first finisher, and supports request/accept/decline rematches. Clients poll every 600 milliseconds.
+Open **Friends**, enter a nickname, and create a room. A second player joins with its six-character code. The host selects difficulty; the guest presses Ready, and the host starts the same puzzle after a three-second countdown. Changing difficulty resets readiness. The server validates moves, tracks three hearts per player, declares the first finisher, and supports request/accept/decline rematches. Clients poll every second without overlapping requests. Refresh offers an explicit rejoin choice. Connection status and pending move counts are visible; interrupted requests pause input until the authoritative board is restored. Move request IDs prevent repeated delivery from consuming another heart. Player presence updates on requests, with an offline indicator after 15 seconds without contact.
 
 Local rooms persist in `.data/rooms.json`, which contains private room credentials and is excluded from Git. Rooms expire after one hour without requests. With `DATABASE_URL`, rooms use shared PostgreSQL storage instead. Each action locks its room inside a transaction, preventing simultaneous actions on multiple server instances from overwriting each other. Local rooms are not migrated into the database.
 
