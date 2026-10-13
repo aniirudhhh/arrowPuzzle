@@ -4109,3 +4109,78 @@ main:has(.daily-experience) {
     font-size: 10px;
   }
 }
+
+.room-leave-dialog {
+  width: min(400px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  margin: auto;
+  padding: 0;
+  color: #f5f7fa;
+  background: #111820;
+  border: 1px solid #29343f;
+  border-radius: 20px;
+  box-shadow: 0 24px 80px #0008;
+}
+.room-leave-dialog::backdrop {
+  background: #05090dcc;
+  backdrop-filter: blur(6px);
+}
+.room-leave-content {
+  padding: clamp(20px, 5vw, 28px);
+}
+.room-leave-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #ffffff08;
+  color: #65daef;
+  margin-bottom: 16px;
+}
+.room-leave-content h2 {
+  margin: 0 0 12px;
+  font-size: 24px;
+}
+.room-leave-content p {
+  color: #99a9bc;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+}
+.room-leave-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+}
+.room-leave-actions button {
+  flex: 1;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #33404e;
+  border-radius: 10px;
+  background: transparent;
+  color: #f5f7fa;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.room-leave-actions .room-leave-confirm {
+  background: #65daef;
+  color: #07141a;
+  border-color: #65daef;
+}
+.room-leave-actions button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+.room-leave-actions button:focus-visible {
+  outline: 2px solid #65daef;
+  outline-offset: 4px;
+}
+.room-leave-actions + p {
+  margin-top: 12px;
+  font-size: 12px;
+}

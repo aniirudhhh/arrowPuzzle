@@ -23,6 +23,7 @@ export default function Multiplayer({
     [connection, setConnection] = useState("connecting"),
     [syncCount, setSyncCount] = useState(0),
     [live, setLive] = useState(false);
+  const leaveDialog = useRef(null);
   const auth = useRef(null),
     busy = useRef(false),
     offset = useRef(0),
@@ -465,14 +466,7 @@ export default function Multiplayer({
               aria-label="Leave room"
               title="Leave room"
               disabled={pending}
-              onClick={() => {
-                if (
-                  window.confirm(
-                    "Leave this room? Your friend will stay in the room.",
-                  )
-                )
-                  action("leave");
-              }}
+              onClick={() => leaveDialog.current?.showModal()}
             >
               <Icon name="close" />
               <span className="room-action-label">Leave</span>
@@ -645,6 +639,46 @@ export default function Multiplayer({
           </div>
         </>
       )}
+      <dialog
+        ref={leaveDialog}
+        className="room-leave-dialog"
+        aria-labelledby="leave-room-title"
+        aria-describedby="leave-room-description"
+      >
+        <div className="room-leave-content">
+          <span className="room-leave-icon">
+            <Icon name="close" />
+          </span>
+          <h2 id="leave-room-title">Leave this room?</h2>
+          <p id="leave-room-description">
+            Your friend will stay in the room. You can join again with the room
+            code.
+          </p>
+          <div className="room-leave-actions">
+            <button
+              type="button"
+              autoFocus
+              onClick={() => leaveDialog.current.close()}
+            >
+              Stay in room
+            </button>
+            <button
+              type="button"
+              className="room-leave-confirm"
+              disabled={pending || syncCount > 0}
+              onClick={() => {
+                leaveDialog.current.close();
+                action("leave");
+              }}
+            >
+              Leave room
+            </button>
+          </div>
+          {syncCount > 0 && (
+            <p role="status">Finishing your moves before leaving�</p>
+          )}
+        </div>
+      </dialog>
       {error && (
         <p className="feedback" role="status">
           {error}
