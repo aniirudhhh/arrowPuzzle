@@ -341,9 +341,12 @@ export function createDaily(seed) {
   return { profile, paths: packedPuzzle(seed, profile), size: profile.size };
 }
 
-export function createChallenge(level) {
+export function createChallenge(level, selectedDifficulty) {
   const difficulty =
-    level <= 3 ? "easy" : ["medium", "medium", "hard", "easy"][(level - 4) % 4];
+    selectedDifficulty ??
+    (level <= 3
+      ? "easy"
+      : ["medium", "medium", "hard", "easy"][(level - 4) % 4]);
   const stage = Math.min(2, Math.floor((level - 1) / 24));
   const size = { easy: 9, medium: 12, hard: 15 }[difficulty] + stage;
   const profile = {

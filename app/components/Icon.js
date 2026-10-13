@@ -1,6 +1,7 @@
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   HeartIcon,
+  Copy01Icon,
   ArrowLeft01Icon,
   ArrowUpRight01Icon,
   PauseIcon,
@@ -19,6 +20,7 @@ import {
 } from "@hugeicons/core-free-icons";
 export default function Icon({ name, ...props }) {
   const icons = {
+    copy: Copy01Icon,
     back: ArrowLeft01Icon,
     pause: PauseIcon,
     play: PlayIcon,

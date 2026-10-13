@@ -3472,3 +3472,503 @@ main:has(.daily-experience) {
     font-size: 19px;
   }
 }
+.friends-screen {
+  width: 100%;
+  max-width: 720px;
+  margin: 20px auto;
+  min-width: 0;
+}
+.friends-screen h1 {
+  font-size: clamp(34px, 6vw, 54px);
+  letter-spacing: -2px;
+}
+.friends-screen label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin: 20px 0 12px;
+}
+.friends-screen input {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 13px;
+  font: inherit;
+  margin-top: 8px;
+  min-width: 0;
+}
+.friends-screen input:focus {
+  outline: 2px solid var(--cyan);
+}
+.join-room {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+.join-room label {
+  flex: 1;
+  margin: 0;
+  max-width: 360px;
+}
+.join-room > button,
+.room-bar button {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+}
+.room-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 25px 0;
+  font-size: 12px;
+}
+.room-bar strong {
+  color: var(--cyan);
+  letter-spacing: 3px;
+  margin-left: 10px;
+}
+.room-bar > button:first-of-type {
+  margin-left: auto;
+}
+.race-players {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin: 25px 0;
+}
+.race-players > div {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+}
+.race-players strong {
+  display: block;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.race-players span,
+.race-players small {
+  font-size: 11px;
+  color: var(--muted);
+}
+.race-players .progress {
+  margin: 12px 0;
+}
+.race-board {
+  max-width: 400px;
+  margin: 20px auto;
+}
+.race-board .visible-path {
+  stroke-width: 3;
+}
+.race-countdown {
+  font: 600 90px Outfit;
+  text-align: center;
+  color: var(--cyan);
+  margin: 45px;
+}
+.race-result {
+  text-align: center;
+  padding: 25px;
+}
+.friends-note {
+  font-size: 10px;
+  line-height: 1.7;
+  color: var(--muted);
+  margin-top: 25px;
+}
+.race-result p {
+  font-size: 11px;
+  color: var(--muted);
+}
+@media (max-width: 480px) {
+  .friends-screen {
+    margin: 0 auto;
+  }
+  .race-players {
+    gap: 8px;
+  }
+  .race-players > div {
+    padding: 12px;
+  }
+  .room-bar {
+    gap: 8px;
+  }
+  .room-bar button {
+    font-size: 10px;
+    padding: 8px;
+  }
+  .friends-screen h1 {
+    font-size: 35px;
+  }
+  .join-room {
+    gap: 8px;
+  }
+  .join-room button {
+    font-size: 12px;
+    padding: 12px;
+  }
+}
+/* Race board takes center stage; player status remains alongside it. */
+.friends-screen.in-race {
+  max-width: 1120px;
+}
+.in-race > h1 {
+  font-size: 30px;
+  margin: 12px 0;
+}
+.in-race > .kicker {
+  font-size: 7px;
+}
+.in-race .room-bar {
+  margin: 18px 0 24px;
+}
+.race-workspace {
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr);
+  gap: 50px;
+  align-items: center;
+}
+.race-sidebar {
+  min-width: 0;
+}
+.race-sidebar .race-players {
+  grid-template-columns: 1fr;
+  margin: 0;
+  gap: 12px;
+}
+.race-players strong .host-badge {
+  display: block;
+  font-size: 7px;
+  color: var(--cyan);
+  letter-spacing: 1px;
+  margin-top: 6px;
+}
+.race-players > div > span {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+.race-hearts {
+  display: inline-flex;
+  gap: 5px;
+}
+.race-hearts svg {
+  width: 16px;
+  height: 16px;
+}
+.race-center {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 360px;
+}
+.race-center .race-board {
+  width: min(100%, 430px);
+  margin: 0;
+}
+.race-center .feedback {
+  margin: 0 0 16px;
+  font-size: 10px;
+}
+.in-race .friends-note {
+  font-size: 9px;
+  max-width: 600px;
+  margin: 25px auto;
+  text-align: center;
+}
+.race-countdown {
+  margin: 0;
+}
+.race-players > div > small {
+  display: block;
+  margin-top: 8px;
+}
+.race-players .progress {
+  margin: 10px 0;
+}
+.race-center .primary {
+  font-size: 12px;
+  min-height: 44px;
+}
+.in-race .room-bar button {
+  min-height: 36px;
+  font-size: 10px;
+  padding: 8px 12px;
+}
+@media (max-width: 700px) {
+  .race-workspace {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .race-sidebar .race-players {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .race-sidebar .race-players > div {
+    padding: 12px;
+  }
+  .race-players strong {
+    font-size: 11px;
+  }
+  .race-players > div > span {
+    font-size: 9px;
+    margin-top: 8px;
+  }
+  .race-hearts svg {
+    width: 13px;
+    height: 13px;
+  }
+  .race-hearts {
+    gap: 3px;
+  }
+  .race-players > div > small {
+    font-size: 9px;
+  }
+  .race-center {
+    min-height: 230px;
+  }
+  .race-center .race-board {
+    max-width: 360px;
+  }
+  .in-race > h1 {
+    font-size: 25px;
+  }
+  .in-race .room-bar {
+    margin: 12px 0 18px;
+    gap: 7px;
+  }
+  .room-bar strong {
+    letter-spacing: 2px;
+  }
+  .in-race .friends-note {
+    font-size: 8px;
+  }
+  .race-result {
+    padding: 12px;
+  }
+  .race-result h2 {
+    font-size: 24px;
+  }
+}
+.rematch-request {
+  padding: 16px;
+  border: 1px solid #67ddf530;
+  border-radius: 10px;
+  margin-top: 16px;
+}
+.rematch-request > div {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.rematch-request > div > button:not(.primary) {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 16px;
+}
+.race-difficulty {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0 20px;
+  flex-wrap: wrap;
+}
+.race-difficulty button {
+  min-height: 38px;
+  padding: 8px 18px;
+  text-transform: capitalize;
+}
+.race-difficulty button[aria-pressed="true"] {
+  color: var(--cyan);
+  border-color: var(--cyan);
+  background: rgba(91, 218, 239, 0.08);
+}
+.race-difficulty-label {
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: capitalize;
+  margin-bottom: 12px;
+}
+.race-players > div > span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.race-players > div > span svg {
+  width: 16px;
+  height: 16px;
+}
+.race-board .visible-path {
+  stroke-width: 2.8;
+}
+@media (max-width: 600px) {
+  .race-difficulty {
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .race-difficulty button {
+    min-height: 34px;
+    padding: 6px 12px;
+  }
+}
+/* Keep escaping arrows inside the puzzle viewport, as on solo boards. */
+.race-board .puzzle-svg {
+  overflow: hidden;
+}
+/* Compact Friends layout: lobby keeps setup details, active races prioritize play. */
+.room-bar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.room-bar button svg {
+  display: none;
+}
+@media (max-width: 700px) {
+  main:has(.friends-screen) {
+    padding: 12px 14px 16px;
+  }
+  .friends-screen.in-race {
+    margin: 0 auto;
+  }
+  .in-race > .kicker {
+    display: none;
+  }
+  .in-race > h1 {
+    margin: 0 0 12px;
+    font-size: 24px;
+  }
+  .race-active > h1,
+  .in-race .friends-note {
+    display: none;
+  }
+  .in-race .room-bar {
+    flex-wrap: nowrap;
+    gap: 6px;
+    margin: 0 0 10px;
+  }
+  .room-bar > span {
+    min-width: 0;
+    white-space: nowrap;
+    font-size: 10px;
+  }
+  .room-bar strong {
+    margin-left: 5px;
+    letter-spacing: 1.5px;
+  }
+  .in-race .room-bar button {
+    padding: 0;
+    width: 34px;
+    height: 34px;
+    min-height: 34px;
+    flex: 0 0 34px;
+  }
+  .room-bar button svg {
+    display: block;
+    width: 16px;
+    height: 16px;
+  }
+  .room-action-label {
+    display: none;
+  }
+  .race-workspace {
+    gap: 10px;
+    align-items: start;
+  }
+  .race-sidebar .race-players {
+    gap: 8px;
+  }
+  .race-sidebar .race-players > div {
+    padding: 8px 10px;
+    border-radius: 8px;
+  }
+  .race-active .race-players strong .host-badge,
+  .race-active .race-players > div > small {
+    display: none;
+  }
+  .race-players strong {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .race-players > div > span {
+    margin-top: 5px;
+    justify-content: flex-start;
+    gap: 3px;
+    white-space: nowrap;
+  }
+  .race-players > div > span svg {
+    width: 12px;
+    height: 12px;
+    flex: 0 0 12px;
+  }
+  .race-players .progress {
+    margin: 6px 0 0;
+  }
+  .race-center {
+    min-height: 0;
+  }
+  .race-difficulty-label {
+    font-size: 10px;
+    margin-bottom: 6px;
+  }
+  .race-center .race-board {
+    width: min(100%, 360px, max(210px, calc(100svh - 240px)));
+    max-width: 360px;
+  }
+  .race-center .race-board > .feedback {
+    font-size: 9px;
+    margin-bottom: 6px;
+  }
+  .race-countdown {
+    font-size: 64px;
+    padding: 30px 0;
+  }
+  .race-result {
+    width: 100%;
+    padding: 8px 0;
+  }
+  .race-result h2 {
+    margin: 8px 0 14px;
+    font-size: 22px;
+  }
+  .rematch-request {
+    padding: 10px;
+    margin-top: 10px;
+  }
+}
+/* In a mobile room, keep navigation out of the playing area. */
+@media (max-width: 700px) {
+  .app-shell:has(.friends-screen.in-race) > header,
+  .app-shell:has(.friends-screen.in-race) > .mobile-navigation {
+    display: none;
+  }
+  .app-shell:has(.friends-screen.in-race) > main {
+    min-height: 100svh;
+    padding-top: max(12px, env(safe-area-inset-top));
+  }
+  .race-center .race-board {
+    width: min(100%, 360px, max(210px, calc(100svh - 172px)));
+  }
+}
+/* SVG arrows use their stroke/glow for keyboard focus, never a browser box. */
+.puzzle-svg,
+.puzzle-path {
+  -webkit-tap-highlight-color: transparent;
+}
+.puzzle-path:focus {
+  outline: none;
+}
