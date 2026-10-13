@@ -15,6 +15,8 @@ import { Board } from "./components/Board";
 import Multiplayer from "./components/Multiplayer";
 import HomeAtmosphere from "./components/HomeAtmosphere";
 import Link from "next/link";
+import useRankedChallenge from "./components/useRankedChallenge";
+import ChallengeLeaderboard from "./components/ChallengeLeaderboard";
 const initial = {
   completed: [],
   sound: false,
@@ -42,7 +44,11 @@ export default function Game() {
     menuToggle = useRef(null),
     menuPanel = useRef(null),
     latestGame = useRef(null);
+  const ranked = useRankedChallenge();
   latestGame.current = game;
+  useEffect(() => {
+    if (screen === "pause" && game?.ranked) ranked.event("pause");
+  }, [screen]);
   const unlockedLevel = store.completed.reduce(
     (max, n) => Math.max(max, n + 1),
     1,
@@ -159,7 +165,19 @@ export default function Game() {
       setScreen("loss");
     }
   }, [screen, game?.time, game?.challenge]);
-  function start(level = 1, daily = false, resume = false, challenge = false) {
+  async function start(
+    level = 1,
+    daily = false,
+    resume = false,
+    challenge = false,
+    rankedPlay = false,
+    nickname = "",
+  ) {
+    let attempt = null;
+    if (rankedPlay) {
+      attempt = await ranked.begin(level, nickname);
+      if (!attempt) return;
+    } else ranked.reset();
     const { size, paths, profile, timeLimit, version, seed } = challenge
       ? createChallenge(level)
       : daily
@@ -172,13 +190,14 @@ export default function Game() {
             level,
             daily,
             challenge,
+            ranked: rankedPlay,
             challengeVersion: challenge ? version : null,
             challengeSeed: challenge ? seed : null,
             hintsUsed: 0,
             timeLimit: challenge ? timeLimit : null,
             size,
             profile,
-            paths,
+            paths: attempt?.paths ?? paths,
             total: paths.length,
             history: [],
             mistakes: 0,
@@ -319,6 +338,7 @@ export default function Game() {
     if (lock.current || screen !== "game") return;
     lock.current = true;
     setHint(null);
+    if (game.ranked) ranked.event("move", p.id);
     const free = isFree(p, game.paths, game.size);
     if (free) slideSound();
     else
@@ -433,6 +453,7 @@ export default function Game() {
     const choices = game.paths.filter((p) => isFree(p, game.paths, game.size));
     const p = choices.find((p) => p.id !== hint) || choices[0];
     if (p) {
+      if (game.ranked) ranked.event("hint");
       setGame((current) => ({
         ...current,
         hintsUsed: (current.hintsUsed || 0) + 1,
@@ -817,6 +838,7 @@ export default function Game() {
                     hint={hint}
                     onPreview={() => {
                       if (lock.current || screen !== "game") return false;
+                      if (game.ranked) ranked.event("hint");
                       if (game.challenge)
                         setGame((current) => ({
                           ...current,
@@ -839,7 +861,13 @@ export default function Game() {
                   <button
                     className="start-fresh-button"
                     onClick={() =>
-                      start(game.level, game.daily, false, game.challenge)
+                      start(
+                        game.level,
+                        game.daily,
+                        false,
+                        game.challenge,
+                        game.ranked,
+                      )
                     }
                   >
                     <Icon name="reset" />
@@ -939,6 +967,13 @@ export default function Game() {
               heart. Difficulty is mixed between rounds, with a fair timer for
               each board.
             </p>
+            <ChallengeLeaderboard
+              challenge={nextChallenge}
+              rankedState={ranked.state}
+              onPlay={(level, nickname) =>
+                start(level, false, false, true, true, nickname)
+              }
+            />
             <div className="challenge-rules">
               {[
                 ["Easy", "Small, gentle boards"],
@@ -1260,10 +1295,22 @@ export default function Game() {
               className="primary big"
               onClick={() =>
                 screen === "loss"
-                  ? start(game.level, game.daily, false, game.challenge)
+                  ? start(
+                      game.level,
+                      game.daily,
+                      false,
+                      game.challenge,
+                      game.ranked,
+                    )
                   : game.daily
                     ? setScreen("daily")
-                    : start(game.level + 1, false, false, game.challenge)
+                    : start(
+                        game.level + 1,
+                        false,
+                        false,
+                        game.challenge,
+                        game.ranked,
+                      )
               }
             >
               {screen === "loss"
@@ -1273,11 +1320,24 @@ export default function Game() {
                   : "Find the next way out"}
               <Icon name="arrow" />
             </button>
+            {game.challenge && game.ranked && screen === "result" && (
+              <ChallengeLeaderboard
+                challenge={game.level}
+                rankedState={ranked.state}
+                results
+              />
+            )}
             <div className="result-actions">
               {screen !== "loss" && (
                 <button
                   onClick={() =>
-                    start(game.level, game.daily, false, game.challenge)
+                    start(
+                      game.level,
+                      game.daily,
+                      false,
+                      game.challenge,
+                      game.ranked,
+                    )
                   }
                 >
                   Play again

@@ -4637,3 +4637,125 @@ input::placeholder {
   filter: none;
   transition: none;
 }
+
+.challenge-leaderboard {
+  margin: 24px 0;
+  padding: clamp(16px, 4vw, 24px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--prussian-blue);
+  width: 100%;
+  max-width: 640px;
+  text-align: left;
+}
+.leaderboard-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.leaderboard-heading h2 {
+  font-size: 22px;
+  margin: 0;
+}
+.leaderboard-heading > span,
+.challenge-leaderboard p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.leaderboard-filter,
+.leaderboard-play {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  margin-top: 16px;
+}
+.challenge-leaderboard label {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+  flex: 1;
+  min-width: 120px;
+}
+.challenge-leaderboard input {
+  width: 100%;
+  padding: 12px;
+  min-height: 44px;
+  border: 1px solid var(--dusk-blue);
+  border-radius: 8px;
+  background: var(--ink-black);
+  color: var(--text);
+  font: inherit;
+}
+.leaderboard-filter > button {
+  padding: 10px 14px;
+  border: 1px solid var(--dusk-blue);
+  border-radius: 8px;
+}
+.leaderboard-categories {
+  display: flex;
+  gap: 8px;
+  margin: 16px 0;
+}
+.leaderboard-categories button {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+.leaderboard-categories button[aria-pressed="true"] {
+  background: var(--dusty-denim);
+  color: var(--ink-black);
+}
+.leaderboard-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.leaderboard-list li {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 4px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+.leaderboard-list .is-you {
+  background: #778da922;
+  border-radius: 8px;
+}
+.leaderboard-name {
+  overflow-wrap: anywhere;
+}
+.leaderboard-score {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.leaderboard-score small {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.leaderboard-play > p {
+  flex-basis: 100%;
+  margin: 0;
+}
+.result-screen .challenge-leaderboard {
+  margin-inline: auto;
+}
+@media (max-width: 400px) {
+  .leaderboard-heading h2 {
+    font-size: 19px;
+  }
+  .leaderboard-list li {
+    gap: 6px;
+    font-size: 13px;
+  }
+  .leaderboard-play .primary {
+    width: 100%;
+  }
+}
