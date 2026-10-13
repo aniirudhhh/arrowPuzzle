@@ -54,3 +54,5 @@ Expired rooms cannot be accessed. Schedule `DELETE FROM public.arrow_rooms WHERE
 ## Verification limits
 
 Production builds and automated puzzle checks are available. Browser automation cannot access this local preview under its URL policy; mobile layouts, animation, and audio need manual review. Shared database integration requires a configured test database.
+
+If multiline certificate pasting is altered by the environment editor, set `DATABASE_CA_CERT_BASE64` to the base64 encoding of the entire PEM file instead. This single-line value takes precedence over `DATABASE_CA_CERT` and preserves certificate verification.
