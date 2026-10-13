@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Icon from "../components/Icon";
 export const metadata = {
   title: "How to Play the Arrow Puzzle",
   description:
@@ -12,7 +13,8 @@ export const metadata = {
 export default function HowToPlay() {
   return (
     <main className="play-guide">
-      <Link href="/" className="guide-brand">
+      <Link href="/" className="guide-brand" aria-label="Back to ArrowOut home">
+        <Icon name="back" aria-hidden="true" />
         ARROW//OUT
       </Link>
       <h1>How to play ArrowOut</h1>

@@ -4524,3 +4524,15 @@ label,
     letter-spacing: -0.055em;
   }
 }
+
+.guide-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+}
+.guide-brand svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
