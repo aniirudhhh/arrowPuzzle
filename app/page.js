@@ -9,8 +9,9 @@ import {
   createChallenge,
 } from "../paths";
 import Icon from "./components/Icon";
-import { Board, FlowingArrow } from "./components/Board";
+import { Board } from "./components/Board";
 import Multiplayer from "./components/Multiplayer";
+import HomeAtmosphere from "./components/HomeAtmosphere";
 import Link from "next/link";
 const initial = {
   completed: [],
@@ -592,52 +593,7 @@ export default function Game() {
           />
         ) : screen === "home" ? (
           <section className="title-screen">
-            <div className="arrow-atmosphere" aria-hidden="true">
-              <svg viewBox="0 0 1440 900" preserveAspectRatio="none">
-                <defs>
-                  <marker
-                    id="ambient-head"
-                    markerWidth="7"
-                    markerHeight="7"
-                    refX="5"
-                    refY="3.5"
-                    orient="auto"
-                  >
-                    <path
-                      d="M1 1 5 3.5 1 6"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.4"
-                    />
-                  </marker>
-                </defs>
-                {[
-                  "M-140 140H410V260H1580",
-                  "M1580 750H1050V630H-140",
-                  "M240-140V380H390V1040",
-                  "M1200 1040V510H1080V-140",
-                  "M-140 450H570V560H1580",
-                  "M1580 40H850V800H-140",
-                ].map((d, i) => (
-                  <g
-                    key={d}
-                    className={`ambient-arrow ambient-${i}`}
-                    style={{
-                      "--delay": `${-i * 2.1}s`,
-                      "--duration": `${13 + (i % 3) * 3}s`,
-                    }}
-                  >
-                    <path className="ambient-rail" d={d} />
-                    <FlowingArrow
-                      route={d}
-                      length={90}
-                      duration={(13 + (i % 3) * 3) * 1000}
-                      delay={i * 2100}
-                    />
-                  </g>
-                ))}
-              </svg>
-            </div>
+            <HomeAtmosphere reduced={store.reduced} />
             <div className="title-content">
               <div className="title-kicker">
                 <span /> A PUZZLE OF PATHS & POSSIBILITIES <span />
@@ -1096,7 +1052,7 @@ export default function Game() {
                   <path
                     d="M100 200 220 120 400 175 595 80 720 180 620 270 390 235 170 315"
                     fill="none"
-                    stroke="#967aff"
+                    stroke="#778da9"
                     strokeWidth="55"
                     strokeLinecap="round"
                     opacity=".12"
@@ -1104,13 +1060,13 @@ export default function Game() {
                   <path
                     d="M150 265 325 150 560 240 675 145"
                     fill="none"
-                    stroke="#67ddf5"
+                    stroke="#e0e1dd"
                     strokeWidth="38"
                     strokeLinecap="round"
                     opacity=".16"
                   />
                 </g>
-                <g fill="#67ddf5" opacity=".5">
+                <g fill="#e0e1dd" opacity=".5">
                   {Array.from({ length: 48 }, (_, i) => (
                     <circle
                       key={i}
@@ -1140,7 +1096,7 @@ export default function Game() {
                   <path
                     d="M-180 25Q-20 70 180 10M-135 46Q10 77 130 38"
                     fill="none"
-                    stroke="#67ddf5"
+                    stroke="#e0e1dd"
                     strokeWidth="8"
                     strokeLinecap="round"
                   />
@@ -1153,17 +1109,17 @@ export default function Game() {
                   />
                   <path
                     d="m615 300 35-45 25 17 45-80m-36 15 36-15 4 37"
-                    stroke="#967aff"
+                    stroke="#778da9"
                     strokeWidth="7"
                   />
                   <path
                     d="m560 52 7 20 21 5-20 8-5 22-8-21-22-4 21-9Z"
-                    stroke="#67ddf5"
+                    stroke="#e0e1dd"
                     strokeWidth="3"
                   />
                   <path
                     d="m228 305 5 14 15 4-14 6-4 15-6-14-15-3 14-7Z"
-                    stroke="#967aff"
+                    stroke="#778da9"
                     strokeWidth="3"
                   />
                   <path
@@ -1173,7 +1129,7 @@ export default function Game() {
                   />
                 </g>
                 <g
-                  stroke="#967aff"
+                  stroke="#778da9"
                   strokeWidth="4"
                   strokeLinecap="round"
                   opacity=".6"

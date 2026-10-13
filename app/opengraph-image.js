@@ -13,7 +13,7 @@ export default function Image() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        background: "#0b0f16",
+        background: "#0d1b2a",
         color: "#f4f7fc",
         fontFamily: "sans-serif",
       }}
@@ -26,9 +26,9 @@ export default function Image() {
           letterSpacing: -6,
         }}
       >
-        ARROW<span style={{ color: "#67ddf5" }}>//</span>OUT
+        ARROW<span style={{ color: "#e0e1dd" }}>//</span>OUT
       </div>
-      <div style={{ fontSize: 34, color: "#67ddf5", marginTop: 24 }}>
+      <div style={{ fontSize: 34, color: "#e0e1dd", marginTop: 24 }}>
         Think. Tap. Escape.
       </div>
       <div style={{ fontSize: 24, color: "#8793a8", marginTop: 40 }}>
