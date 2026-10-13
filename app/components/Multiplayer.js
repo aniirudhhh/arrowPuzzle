@@ -223,6 +223,59 @@ export default function Multiplayer({
       unsubscribe?.();
     };
   }, [room?.code]);
+  useEffect(() => {
+    if (!savedRoom || room) return;
+    const controller = new AbortController();
+    let checking = false;
+    const check = async () => {
+      if (checking || auth.current || !navigator.onLine) return;
+      checking = true;
+      try {
+        const response = await fetch("/api/race", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "check", ...savedRoom }),
+          signal: AbortSignal.any([
+            controller.signal,
+            AbortSignal.timeout(10000),
+          ]),
+        });
+        if (!response.ok) return;
+        const data = await response.json();
+        if (
+          data.valid === false &&
+          !controller.signal.aborted &&
+          !auth.current
+        ) {
+          setSavedRoom(null);
+          try {
+            const stored = JSON.parse(
+              sessionStorage.getItem("arrow-race") || "null",
+            );
+            if (
+              stored?.code === savedRoom.code &&
+              stored?.token === savedRoom.token
+            )
+              sessionStorage.removeItem("arrow-race");
+          } catch {}
+        }
+      } catch {
+        /* Keep the saved room when its status cannot be verified. */
+      } finally {
+        checking = false;
+      }
+    };
+    check();
+    const interval = setInterval(check, 60000);
+    window.addEventListener("focus", check);
+    window.addEventListener("online", check);
+    return () => {
+      controller.abort();
+      clearInterval(interval);
+      window.removeEventListener("focus", check);
+      window.removeEventListener("online", check);
+    };
+  }, [savedRoom, room?.code]);
   const celebrated = useRef(null);
   useEffect(() => {
     if (

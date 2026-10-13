@@ -8,6 +8,7 @@ export async function POST(request) {
         "create",
         "join",
         "poll",
+        "check",
         "ready",
         "difficulty",
         "start",
