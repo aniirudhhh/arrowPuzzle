@@ -4372,3 +4372,9 @@ header .wordmark {
     inset: -68px -16px -30px;
   }
 }
+
+.home-atmosphere .home-dot-matrix {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
