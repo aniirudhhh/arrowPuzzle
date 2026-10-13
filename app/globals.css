@@ -4536,3 +4536,17 @@ label,
   height: 20px;
   flex-shrink: 0;
 }
+
+.game-stage .game-heading h2 {
+  white-space: nowrap;
+  font-size: clamp(20px, 2vw, 24px);
+  letter-spacing: -0.035em;
+}
+.game-stage .game-heading > div {
+  min-width: 0;
+}
+@media (max-width: 360px) {
+  .game-stage .game-heading h2 {
+    font-size: 20px;
+  }
+}
