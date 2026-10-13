@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Board } from "./Board";
 import Icon from "./Icon";
+import { isFree } from "../../paths.js";
 export default function Multiplayer({
   onSlide,
   onImpact,
@@ -19,7 +20,11 @@ export default function Multiplayer({
     [active, setActive] = useState(null);
   const auth = useRef(null),
     busy = useRef(false),
-    offset = useRef(0);
+    offset = useRef(0),
+    animationLock = useRef(false),
+    moveQueue = useRef(Promise.resolve()),
+    queuedMoves = useRef(0),
+    queueVersion = useRef(0);
   async function call(action, extra = {}) {
     const response = await fetch("/api/race", {
       method: "POST",
@@ -74,7 +79,7 @@ export default function Multiplayer({
       if (!auth.current || busy.current) return;
       try {
         const next = await call("poll");
-        if (!cancelled) setRoom(next);
+        if (!cancelled && !busy.current) setRoom(next);
       } catch (e) {
         if (!cancelled) setError(e.message);
       }
@@ -116,32 +121,81 @@ export default function Multiplayer({
       </div>
     );
   }
-  async function move(path) {
+  function move(path) {
     if (
-      busy.current ||
+      animationLock.current ||
       room.phase !== "racing" ||
       room.players.find((p) => p.you)?.hearts === 0
     )
       return;
     onUnlock?.();
+    animationLock.current = true;
     busy.current = true;
+    queuedMoves.current++;
+    const version = queueVersion.current;
+    const escaped = isFree(path, room.paths, room.size);
+    const reduced =
+      reducedMotion || matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (escaped) onSlide?.();
+    else onImpact?.(reduced ? 0 : 0.26);
     setError("");
-    try {
-      const next = await call("move", { id: path.id });
-      const escaped = !next.paths.some((p) => p.id === path.id);
-      const reduced =
-        reducedMotion || matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (escaped) onSlide?.();
-      else onImpact?.(reduced ? 0 : 0.26);
-      setActive({ id: path.id, type: escaped ? "escaping" : "blocked" });
-      await new Promise((r) => setTimeout(r, reduced ? 0 : 650));
-      setRoom(next);
-      setActive(null);
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      busy.current = false;
-    }
+    setActive({ id: path.id, type: escaped ? "escaping" : "blocked" });
+    // Animate immediately; the server still validates every move and decides the winner.
+    const animation = new Promise((resolve) =>
+      setTimeout(
+        () => {
+          if (version === queueVersion.current) {
+            setRoom((current) =>
+              current?.phase !== "racing"
+                ? current
+                : {
+                    ...current,
+                    paths: escaped
+                      ? current.paths.filter((p) => p.id !== path.id)
+                      : current.paths,
+                    players: current.players.map((p) =>
+                      !p.you
+                        ? p
+                        : {
+                            ...p,
+                            escaped: p.escaped + (escaped ? 1 : 0),
+                            hearts: Math.max(0, p.hearts - (escaped ? 0 : 1)),
+                          },
+                    ),
+                  },
+            );
+          }
+          setActive(null);
+          animationLock.current = false;
+          resolve();
+        },
+        reduced ? 0 : 650,
+      ),
+    );
+    // Keep requests ordered while allowing the next tap after its animation.
+    moveQueue.current = moveQueue.current
+      .then(async () => {
+        if (version !== queueVersion.current) return;
+        try {
+          const next = await call("move", { id: path.id });
+          await animation;
+          if (queuedMoves.current === 1 && version === queueVersion.current)
+            setRoom(next);
+        } catch (error) {
+          queueVersion.current++;
+          await animation;
+          setError(error.message);
+          if (auth.current) {
+            try {
+              setRoom(await call("poll"));
+            } catch {}
+          }
+        }
+      })
+      .finally(() => {
+        queuedMoves.current--;
+        if (!queuedMoves.current) busy.current = false;
+      });
   }
   const me = room?.players.find((p) => p.you),
     guest = room?.players.find((p) => !p.host);
