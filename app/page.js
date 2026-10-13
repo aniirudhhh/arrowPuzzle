@@ -815,6 +815,15 @@ export default function Game() {
                     onMove={move}
                     active={active}
                     hint={hint}
+                    onPreview={() => {
+                      if (lock.current || screen !== "game") return false;
+                      if (game.challenge)
+                        setGame((current) => ({
+                          ...current,
+                          hintsUsed: (current.hintsUsed || 0) + 1,
+                        }));
+                      return true;
+                    }}
                   />
                 </div>
               </div>

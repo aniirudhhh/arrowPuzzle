@@ -685,6 +685,12 @@ export default function Multiplayer({
                     size={room.size}
                     active={active}
                     onMove={move}
+                    onPreview={() =>
+                      room.phase === "racing" &&
+                      !animationLock.current &&
+                      !recovering.current &&
+                      me?.hearts > 0
+                    }
                   />
                 </div>
               )}

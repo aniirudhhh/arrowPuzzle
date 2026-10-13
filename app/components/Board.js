@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 export function FlowingArrow({
   route,
   length = 46,
@@ -153,9 +153,44 @@ export function Board({
   active,
   hint,
   decorative = false,
+  onPreview,
 }) {
   const touchStart = useRef(null),
-    lastTouch = useRef(0);
+    lastTouch = useRef(0),
+    holdTimer = useRef(null);
+  const [preview, setPreview] = useState(null);
+  useEffect(() => () => clearTimeout(holdTimer.current), []);
+  const endHold = () => {
+    clearTimeout(holdTimer.current);
+    setPreview(null);
+  };
+  const guidePath = paths.find((p) => p.id === preview);
+  let guide = null;
+  if (guidePath) {
+    const [hx, hy] = guidePath.cells[0];
+    const [dx, dy] = {
+      right: [1, 0],
+      left: [-1, 0],
+      up: [0, -1],
+      down: [0, 1],
+    }[guidePath.d];
+    const occupied = new Set(
+      paths.flatMap((p) => p.cells.map(([x, y]) => `${x},${y}`)),
+    );
+    let x = hx + dx,
+      y = hy + dy;
+    while (
+      x >= 0 &&
+      y >= 0 &&
+      x < size &&
+      y < size &&
+      !occupied.has(`${x},${y}`)
+    ) {
+      x += dx;
+      y += dy;
+    }
+    guide = { hx, hy, x, y, blocked: x >= 0 && y >= 0 && x < size && y < size };
+  }
   const unit = 40,
     offset = 26,
     extent = (size - 1) * unit + offset * 2;
@@ -175,6 +210,24 @@ export function Board({
           fill="#34404d"
         />
       ))}
+      {guide && (
+        <g
+          className={`path-preview ${guide.blocked ? "preview-blocked" : ""}`}
+          aria-hidden="true"
+        >
+          <line
+            x1={offset + guide.hx * unit}
+            y1={offset + guide.hy * unit}
+            x2={offset + guide.x * unit}
+            y2={offset + guide.y * unit}
+          />
+          <circle
+            cx={offset + guide.x * unit}
+            cy={offset + guide.y * unit}
+            r="5"
+          />
+        </g>
+      )}
       {paths.map((p) => {
         const pts = p.cells.slice().reverse(),
           [x, y] = p.cells[0],
@@ -199,30 +252,54 @@ export function Board({
             role={decorative ? undefined : "button"}
             aria-label={`Path ${p.id + 1}, points ${p.d}. Activate to escape.`}
             onPointerDown={(e) => {
-              if (e.pointerType !== "mouse")
-                touchStart.current = {
-                  id: e.pointerId,
-                  x: e.clientX,
-                  y: e.clientY,
-                };
+              if (decorative || active || e.button !== 0) return;
+              lastTouch.current = 0;
+              touchStart.current = {
+                id: e.pointerId,
+                x: e.clientX,
+                y: e.clientY,
+                held: false,
+              };
+              e.currentTarget.setPointerCapture?.(e.pointerId);
+              clearTimeout(holdTimer.current);
+              holdTimer.current = setTimeout(() => {
+                if (!touchStart.current || onPreview?.(p) === false) return;
+                touchStart.current.held = true;
+                setPreview(p.id);
+              }, 400);
+            }}
+            onPointerMove={(e) => {
+              const start = touchStart.current;
+              if (
+                start &&
+                Math.hypot(e.clientX - start.x, e.clientY - start.y) > 10
+              ) {
+                start.cancelled = true;
+                endHold();
+              }
             }}
             onPointerCancel={() => {
               touchStart.current = null;
+              lastTouch.current = Date.now();
+              endHold();
             }}
             onPointerUp={(e) => {
               const start = touchStart.current;
               touchStart.current = null;
-              if (
-                decorative ||
-                e.pointerType === "mouse" ||
-                start?.id !== e.pointerId
-              )
+              endHold();
+              if (decorative || start?.id !== e.pointerId) return;
+              if (start.held || start.cancelled) {
+                lastTouch.current = Date.now();
+                e.preventDefault();
                 return;
+              }
+              if (e.pointerType === "mouse") return;
               lastTouch.current = Date.now();
-              if (Math.hypot(e.clientX - start.x, e.clientY - start.y) > 10)
-                return;
               e.preventDefault();
               onMove(p);
+            }}
+            onContextMenu={(e) => {
+              if (!decorative) e.preventDefault();
             }}
             onClick={(e) => {
               if (

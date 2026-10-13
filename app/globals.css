@@ -4610,3 +4610,25 @@ input::placeholder {
     font-size: 12px;
   }
 }
+
+.path-preview {
+  color: var(--alabaster-grey);
+  pointer-events: none;
+}
+.path-preview line {
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-dasharray: 6 5;
+  opacity: 0.85;
+}
+.path-preview circle {
+  fill: currentColor;
+}
+.path-preview.preview-blocked {
+  color: #ff738d;
+}
+.puzzle-path {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}

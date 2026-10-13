@@ -36,6 +36,18 @@ export default function HowToPlay() {
         </li>
         <li>Keep clearing paths until every arrow has escaped.</li>
       </ol>
+      <h2>Hold to preview a route</h2>
+      <p>
+        Press and hold an arrow for a moment to show a straight guide along its
+        exit direction. A red endpoint marks the first blocking path, including
+        the arrow�s own tail. A light guide means the route is clear.
+      </p>
+      <p>
+        Release to hide the guide without moving the arrow. A quick tap attempts
+        the move. Each preview shown in a timed Challenge counts as one hint and
+        will put that attempt in the �With hints� category when leaderboards are
+        added. Previews are free in regular Levels.
+      </p>
       <h2>Protect your three hearts</h2>
       <p>
         Each round starts with three hearts. A blocked tap costs one heart. Lose
