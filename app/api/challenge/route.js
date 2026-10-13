@@ -1,6 +1,9 @@
 import { challengeRequest, playerToken } from "../../../lib/challenge-store.js";
 import { AttemptError } from "../../../lib/challenge-attempt.js";
-import { validChallengeOrigin } from "../../../lib/challenge-origin.js";
+import {
+  validChallengeOrigin,
+  secureChallengeCookie,
+} from "../../../lib/challenge-origin.js";
 export const runtime = "nodejs";
 export async function POST(request) {
   try {
@@ -22,7 +25,7 @@ export async function POST(request) {
     return Response.json(result, {
       headers: {
         "Cache-Control": "no-store",
-        "Set-Cookie": `arrow-player=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=31536000${process.env.NETLIFY ? "; Secure" : ""}`,
+        "Set-Cookie": `arrow-player=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=31536000${secureChallengeCookie(request) ? "; Secure" : ""}`,
       },
     });
   } catch (error) {
