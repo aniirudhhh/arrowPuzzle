@@ -600,10 +600,7 @@ export default function Game() {
               </div>
               <h1 className="game-title">
                 ARROW<span className="title-slashes">//</span>
-                <span className="title-out">
-                  OUT
-                  <Icon name="arrow" />
-                </span>
+                <span className="title-out">OUT</span>
               </h1>
               <p className="title-tagline">Think. Tap. Escape.</p>
               <p className="title-description">
