@@ -1,5 +1,10 @@
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap");
 :root {
+  --font-display: var(--font-google-sans-flex), Arial, sans-serif;
+  --font-body: var(--font-roboto-flex), Arial, sans-serif;
+  --weight-body: 430;
+  --weight-label: 500;
+  --weight-ui: 560;
+  --weight-heading: 620;
   --ink-black: #0d1b2aff;
   --prussian-blue: #1b263bff;
   --dusk-blue: #415a77ff;
@@ -14,7 +19,7 @@
   --border: #ffffff10;
   --success: #51d6a1;
   color-scheme: dark;
-  font-family: Manrope, Arial, sans-serif;
+  font-family: var(--font-body);
   background: var(--bg);
   color: var(--text);
 }
@@ -61,7 +66,7 @@ header {
   gap: 20px;
 }
 .wordmark {
-  font: 700 24px "Outfit";
+  font: 700 24px var(--font-display);
   display: flex;
   align-items: center;
   gap: 2px;
@@ -209,7 +214,7 @@ footer i {
 h1,
 h2,
 h3 {
-  font-family: "Outfit", Arial, sans-serif;
+  font-family: var(--font-display);
 }
 h1 {
   font-weight: 500;
@@ -495,7 +500,7 @@ h1 > span {
   margin-bottom: 8px;
 }
 .stat strong {
-  font: 400 30px "Outfit";
+  font: 400 30px var(--font-display);
   font-variant-numeric: tabular-nums;
   letter-spacing: -1px;
 }
@@ -557,7 +562,7 @@ h1 > span {
   margin-bottom: 18px;
 }
 .pack-index {
-  font: 400 38px "Outfit";
+  font: 400 38px var(--font-display);
   color: #415a77;
 }
 .pack-heading h3 {
@@ -583,7 +588,7 @@ h1 > span {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font: 500 20px "Outfit";
+  font: 500 20px var(--font-display);
   background: #1b263b;
 }
 .level-grid svg {
@@ -624,7 +629,7 @@ h1 > span {
 }
 .daily-stats strong {
   display: block;
-  font: 400 30px "Outfit";
+  font: 400 30px var(--font-display);
   margin-bottom: 8px;
 }
 .daily-stats span {
@@ -672,7 +677,7 @@ h1 > span {
   border-bottom: 1px solid var(--border);
 }
 .setting-row h3 {
-  font: 500 16px Manrope;
+  font: 500 16px var(--font-body);
   margin: 0 0 10px;
 }
 .setting-row p {
@@ -1037,7 +1042,7 @@ h1 > span {
 }
 .game-title {
   font:
-    700 clamp(90px, 10.6vw, 156px)/0.83 "Outfit",
+    700 clamp(90px, 10.6vw, 156px)/0.83 var(--font-display),
     sans-serif;
   margin: 0;
   display: inline-block;
@@ -1064,7 +1069,7 @@ h1 > span {
   stroke-width: 1.2;
 }
 .title-tagline {
-  font: 400 19px "Outfit";
+  font: 400 19px var(--font-display);
   letter-spacing: 3px;
   color: #778da9;
   margin: 30px 0 35px;
@@ -1459,7 +1464,7 @@ h1 > span {
 
 .level-difficulty {
   display: block;
-  font: 500 7px Manrope;
+  font: 500 7px var(--font-body);
   text-transform: uppercase;
   color: var(--muted);
   margin-top: 8px;
@@ -1478,7 +1483,7 @@ h1 > span {
 }
 .graffiti-tag,
 .graffiti-outline {
-  font-family: "Outfit", Arial, sans-serif;
+  font-family: var(--font-display);
   font-style: italic;
   paint-order: stroke fill;
 }
@@ -2080,7 +2085,7 @@ main {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font: 500 20px Outfit;
+  font: 500 20px var(--font-display);
   padding-bottom: 12px;
   border-bottom: 1px solid var(--border);
 }
@@ -3035,12 +3040,12 @@ main:has(.daily-experience) {
   border-bottom: 1px solid var(--border);
 }
 .daily-record strong {
-  font: 500 25px Outfit;
+  font: 500 25px var(--font-display);
   display: block;
   font-variant-numeric: tabular-nums;
 }
 .daily-record strong small {
-  font: 400 10px Manrope;
+  font: 400 10px var(--font-body);
   color: var(--muted);
 }
 .daily-record > div > span {
@@ -3431,7 +3436,7 @@ main:has(.daily-experience) {
 }
 .challenge-rules strong {
   display: block;
-  font: 500 18px Outfit;
+  font: 500 18px var(--font-display);
 }
 .challenge-rules span {
   display: block;
@@ -3574,7 +3579,7 @@ main:has(.daily-experience) {
   stroke-width: 3;
 }
 .race-countdown {
-  font: 600 90px Outfit;
+  font: 600 90px var(--font-display);
   text-align: center;
   color: var(--cyan);
   margin: 45px;
@@ -4073,14 +4078,14 @@ main:has(.daily-experience) {
 }
 .play-guide h1 {
   font:
-    600 clamp(28px, 6vw, 44px) Outfit,
+    600 clamp(28px, 6vw, 44px) var(--font-display),
     sans-serif;
   line-height: 1.2;
   margin: 32px 0 20px;
 }
 .play-guide h2 {
   font:
-    600 24px Outfit,
+    600 24px var(--font-display),
     sans-serif;
   margin: 32px 0 12px;
 }
@@ -4377,4 +4382,75 @@ header .wordmark {
   position: absolute;
   inset: 0;
   z-index: 1;
+}
+
+/* Variable type roles; component sizing remains responsible for responsive layout. */
+body {
+  font-family: var(--font-body);
+  font-weight: var(--weight-body);
+  font-optical-sizing: auto;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+button,
+nav,
+[role="button"],
+.wordmark,
+.game-title,
+.title-tagline {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+}
+button {
+  font-weight: var(--weight-ui);
+  line-height: 1.3;
+}
+nav button {
+  font-weight: 520;
+  letter-spacing: 0;
+}
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: var(--weight-heading);
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+p,
+label,
+input,
+textarea,
+select,
+.kicker,
+.tiny-label,
+.feedback,
+.friends-note {
+  font-family: var(--font-body);
+  font-optical-sizing: auto;
+}
+label,
+.kicker,
+.tiny-label {
+  font-weight: var(--weight-label);
+}
+.title-description,
+.feedback,
+.friends-note {
+  line-height: 1.6;
+}
+.room-leave-content h2 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-heading);
+}
+.title-actions button,
+.room-leave-actions button,
+.friend-cta {
+  font-family: var(--font-display);
+  font-weight: var(--weight-ui);
 }

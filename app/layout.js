@@ -1,4 +1,21 @@
 import "./globals.css";
+import { Google_Sans_Flex, Roboto_Flex } from "next/font/google";
+const displayFont = Google_Sans_Flex({
+  subsets: ["latin"],
+  weight: "variable",
+  axes: ["opsz"],
+  display: "swap",
+  variable: "--font-google-sans-flex",
+  fallback: ["Arial", "sans-serif"],
+  adjustFontFallback: false,
+});
+const bodyFont = Roboto_Flex({
+  subsets: ["latin"],
+  weight: "variable",
+  axes: ["opsz"],
+  display: "swap",
+  variable: "--font-roboto-flex",
+});
 const siteUrl = "https://arrowout.xyz";
 const description =
   "Play ArrowOut, a free online arrow puzzle game. Clear tangled paths, explore endless levels, solve daily and timed challenges, or race a friend.";
@@ -45,7 +62,7 @@ export const metadata = {
 };
 export default function Layout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${displayFont.variable} ${bodyFont.variable}`}>
       <body>{children}</body>
     </html>
   );
