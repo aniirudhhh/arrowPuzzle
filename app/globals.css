@@ -4227,3 +4227,37 @@ main:has(.daily-experience) {
     font-size: 13px;
   }
 }
+
+/* Keep medium-width navigation in normal flow so it cannot cover the brand. */
+header .wordmark {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+@media (min-width: 851px) and (max-width: 1099px) {
+  header nav {
+    position: static;
+    inset: auto;
+    justify-content: flex-end;
+    gap: 16px;
+    pointer-events: auto;
+  }
+  header nav > .icon-button {
+    position: static;
+    transform: none;
+    flex-shrink: 0;
+  }
+  header nav > .icon-button:active {
+    transform: scale(0.97);
+  }
+  header nav > button {
+    white-space: nowrap;
+  }
+}
+@media (min-width: 701px) and (max-width: 850px) {
+  header nav {
+    display: none;
+  }
+  header .mobile-menu-toggle {
+    display: grid;
+  }
+}
