@@ -684,10 +684,17 @@ export default function Multiplayer({
                       : "Clear the board before your friend."}
                   </p>
                   <Board
+                    key={`${room.code}-${room.round}`}
                     paths={room.paths}
                     size={room.size}
                     active={active}
                     onMove={move}
+                    enabled={
+                      room.phase === "racing" &&
+                      connection === "connected" &&
+                      !recovering.current &&
+                      me?.hearts > 0
+                    }
                     onPreview={() =>
                       room.phase === "racing" &&
                       !animationLock.current &&

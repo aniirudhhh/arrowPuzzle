@@ -4203,6 +4203,9 @@ main:has(.daily-experience) {
 .puzzle-path {
   touch-action: manipulation;
 }
+.puzzle-path.tap-queued {
+  color: var(--alabaster-grey);
+}
 
 .friend-cta {
   display: flex;

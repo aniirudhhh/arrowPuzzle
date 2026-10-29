@@ -144,11 +144,46 @@ export function Board({
   hint,
   decorative = false,
   onPreview,
+  enabled = true,
 }) {
   const touchStart = useRef(null),
-    lastTouch = useRef(0),
-    holdTimer = useRef(null);
+    holdTimer = useRef(null),
+    tapQueue = useRef([]),
+    moving = useRef(false);
   const [preview, setPreview] = useState(null);
+  const [queued, setQueued] = useState([]);
+  useEffect(() => {
+    if (!enabled || decorative) {
+      tapQueue.current = [];
+      moving.current = false;
+      setQueued([]);
+      return;
+    }
+    if (active) return;
+    moving.current = false;
+    let path;
+    while (tapQueue.current.length && !path) {
+      const id = tapQueue.current.shift();
+      path = paths.find((p) => p.id === id);
+    }
+    setQueued([...tapQueue.current]);
+    if (path) {
+      moving.current = true;
+      onMove(path);
+    }
+  }, [active, paths, enabled, decorative]);
+  function activate(path) {
+    if (decorative || !enabled || active?.id === path.id) return;
+    if (active || moving.current) {
+      if (!tapQueue.current.includes(path.id)) {
+        tapQueue.current.push(path.id);
+        setQueued([...tapQueue.current]);
+      }
+      return;
+    }
+    moving.current = true;
+    onMove(path);
+  }
   useEffect(() => () => clearTimeout(holdTimer.current), []);
   const endHold = () => {
     clearTimeout(holdTimer.current);
@@ -231,7 +266,7 @@ export function Board({
         return (
           <g
             key={p.id}
-            className={`puzzle-path tone-${p.id % 5} ${active?.id === p.id ? active.type : ""} ${hint === p.id ? "hinted" : ""}`}
+            className={`puzzle-path tone-${p.id % 5} ${active?.id === p.id ? active.type : ""} ${hint === p.id ? "hinted" : ""} ${queued.includes(p.id) ? "tap-queued" : ""}`}
             style={{
               "--tx":
                 p.d === "right" ? "650px" : p.d === "left" ? "-650px" : "0px",
@@ -242,8 +277,8 @@ export function Board({
             role={decorative ? undefined : "button"}
             aria-label={`Path ${p.id + 1}, points ${p.d}. Activate to escape.`}
             onPointerDown={(e) => {
-              if (decorative || active || e.button !== 0) return;
-              lastTouch.current = 0;
+              if (decorative || !enabled || !e.isPrimary || e.button !== 0)
+                return;
               touchStart.current = {
                 id: e.pointerId,
                 x: e.clientX,
@@ -253,8 +288,9 @@ export function Board({
               e.currentTarget.setPointerCapture?.(e.pointerId);
               clearTimeout(holdTimer.current);
               holdTimer.current = setTimeout(() => {
-                if (!touchStart.current || onPreview?.(p) === false) return;
+                if (!touchStart.current || touchStart.current.cancelled) return;
                 touchStart.current.held = true;
+                if (onPreview?.(p) === false) return;
                 setPreview(p.id);
               }, 400);
             }}
@@ -262,46 +298,42 @@ export function Board({
               const start = touchStart.current;
               if (
                 start &&
+                start.id === e.pointerId &&
                 Math.hypot(e.clientX - start.x, e.clientY - start.y) > 10
               ) {
                 start.cancelled = true;
                 endHold();
               }
             }}
-            onPointerCancel={() => {
+            onPointerCancel={(e) => {
+              if (touchStart.current?.id !== e.pointerId) return;
               touchStart.current = null;
-              lastTouch.current = Date.now();
               endHold();
             }}
             onPointerUp={(e) => {
               const start = touchStart.current;
+              if (start?.id !== e.pointerId) return;
               touchStart.current = null;
               endHold();
-              if (decorative || start?.id !== e.pointerId) return;
+              if (decorative) return;
               if (start.held || start.cancelled) {
-                lastTouch.current = Date.now();
                 e.preventDefault();
                 return;
               }
-              if (e.pointerType === "mouse") return;
-              lastTouch.current = Date.now();
               e.preventDefault();
-              onMove(p);
+              activate(p);
             }}
             onContextMenu={(e) => {
               if (!decorative) e.preventDefault();
             }}
             onClick={(e) => {
-              if (
-                !decorative &&
-                (e.detail === 0 || Date.now() - lastTouch.current > 800)
-              )
-                onMove(p);
+              // Pointer taps activate on release; only assistive clicks use click.
+              if (e.detail === 0) activate(p);
             }}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
-                onMove(p);
+                if (!e.repeat) activate(p);
               }
             }}
           >
