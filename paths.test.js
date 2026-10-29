@@ -31,9 +31,13 @@ test("campaign rhythm is deterministic, dense when hard, and always solvable", (
       p.cells.map((c) => c.join(",")),
     );
     assert.equal(new Set(occupied).size, occupied.length);
-    density[board.profile.difficulty].push(
-      puzzleMetrics(board.paths, board.size).density,
+    const expectedCells = board.shape?.cells.length ?? board.size * board.size;
+    assert.equal(
+      occupied.length,
+      expectedCells,
+      `Level ${level} fills its playable silhouette`,
     );
+    density[board.profile.difficulty].push(occupied.length / expectedCells);
     let remaining = board.paths;
     while (remaining.length) {
       const next = remaining.find((p) => isFree(p, remaining, board.size));
@@ -48,6 +52,49 @@ test("campaign rhythm is deterministic, dense when hard, and always solvable", (
   assert.equal(average("hard"), 1);
   assert.equal(levelProfile(12, true).difficulty, "medium");
   assert.deepEqual(createLevel(12, 20261013), createLevel(12, 20261013));
+});
+
+test("first five campaign silhouettes are distinct, connected, deterministic and fully solvable", () => {
+  const names = ["Cat", "Butterfly", "Bird", "Fish", "Turtle"];
+  for (let level = 1; level <= 5; level++) {
+    const board = createLevel(level);
+    assert.equal(board.shape.name, names[level - 1]);
+    assert.deepEqual(board, createLevel(level));
+    const allowed = new Set(board.shape.cells.map((c) => c.join(",")));
+    assert.ok(allowed.size < board.size * board.size);
+    assert.ok(allowed.size > board.size * board.size * 0.35);
+    const visited = new Set(),
+      pending = [board.shape.cells[0]];
+    while (pending.length) {
+      const [x, y] = pending.pop(),
+        key = `${x},${y}`;
+      if (visited.has(key) || !allowed.has(key)) continue;
+      visited.add(key);
+      pending.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
+    }
+    assert.equal(
+      visited.size,
+      allowed.size,
+      `${board.shape.name} has no detached cells`,
+    );
+    for (const path of board.paths) {
+      assert.ok(path.cells.every((c) => allowed.has(c.join(","))));
+      for (let i = 1; i < path.cells.length; i++)
+        assert.equal(
+          Math.abs(path.cells[i][0] - path.cells[i - 1][0]) +
+            Math.abs(path.cells[i][1] - path.cells[i - 1][1]),
+          1,
+        );
+    }
+    let remaining = board.paths;
+    while (remaining.length) {
+      const free = remaining.find((p) => isFree(p, remaining, board.size));
+      assert.ok(free, `${board.shape.name} remains solvable`);
+      remaining = remaining.filter((p) => p.id !== free.id);
+    }
+  }
+  assert.equal(createLevel(6).shape, undefined);
+  assert.equal(createLevel(1, 20261029).shape, undefined);
 });
 test("an arrow cannot escape through its own tail", () => {
   const loop = {

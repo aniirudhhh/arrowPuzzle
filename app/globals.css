@@ -4206,6 +4206,18 @@ main:has(.daily-experience) {
 .puzzle-path.tap-queued {
   color: var(--alabaster-grey);
 }
+.board-silhouette {
+  pointer-events: none;
+}
+.silhouette-fill {
+  fill: #778da908;
+}
+.silhouette-border {
+  fill: none;
+  stroke: #778da94d;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
 
 .friend-cta {
   display: flex;

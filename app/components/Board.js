@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import { arrowGeometry } from "../../lib/arrow-geometry";
 export function FlowingArrow({
   route,
@@ -145,6 +145,7 @@ export function Board({
   decorative = false,
   onPreview,
   enabled = true,
+  shape,
 }) {
   const touchStart = useRef(null),
     holdTimer = useRef(null),
@@ -219,18 +220,50 @@ export function Board({
   const unit = 40,
     offset = 26,
     extent = (size - 1) * unit + offset * 2;
+  const silhouette = useMemo(() => {
+    if (!shape) return null;
+    const occupied = new Set(shape.cells.map(([x, y]) => `${x},${y}`));
+    let fill = "",
+      border = "";
+    for (const [x, y] of shape.cells) {
+      const left = offset + x * unit - unit / 2,
+        top = offset + y * unit - unit / 2;
+      fill += `M${left} ${top}h${unit}v${unit}h${-unit}Z `;
+      if (!occupied.has(`${x},${y - 1}`)) border += `M${left} ${top}h${unit} `;
+      if (!occupied.has(`${x + 1},${y}`))
+        border += `M${left + unit} ${top}v${unit} `;
+      if (!occupied.has(`${x},${y + 1}`))
+        border += `M${left} ${top + unit}h${unit} `;
+      if (!occupied.has(`${x - 1},${y}`)) border += `M${left} ${top}v${unit} `;
+    }
+    return { fill, border };
+  }, [shape]);
+  const dots =
+    shape?.cells ??
+    Array.from({ length: size * size }, (_, i) => [
+      i % size,
+      Math.floor(i / size),
+    ]);
   return (
     <svg
       className={`puzzle-svg ${hint !== null && hint !== undefined ? "showing-hint" : ""}`}
       viewBox={`0 0 ${extent} ${extent}`}
       role={decorative ? "img" : "group"}
-      aria-label="Arrow escape puzzle"
+      aria-label={
+        shape ? `${shape.name} arrow escape puzzle` : "Arrow escape puzzle"
+      }
     >
-      {Array.from({ length: size * size }, (_, i) => (
+      {silhouette && (
+        <g className="board-silhouette" aria-hidden="true">
+          <path d={silhouette.fill} className="silhouette-fill" />
+          <path d={silhouette.border} className="silhouette-border" />
+        </g>
+      )}
+      {dots.map(([x, y], i) => (
         <circle
           key={i}
-          cx={offset + (i % size) * unit}
-          cy={offset + Math.floor(i / size) * unit}
+          cx={offset + x * unit}
+          cy={offset + y * unit}
           r="1.3"
           fill="#34404d"
         />

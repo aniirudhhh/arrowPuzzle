@@ -1,3 +1,4 @@
+import { levelShape } from "./lib/level-shapes.js";
 const directions = { right: [1, 0], left: [-1, 0], up: [0, -1], down: [0, 1] };
 export function createPuzzle(seed = 1, size = 11, options = {}) {
   let s = seed >>> 0;
@@ -150,7 +151,13 @@ export function puzzleMetrics(paths, size) {
 export function createLevel(level, dailySeed = null) {
   const profile = levelProfile(level, dailySeed !== null),
     seed = dailySeed ?? level * 7919;
-  return { profile, paths: packedPuzzle(seed, profile), size: profile.size };
+  const shape = dailySeed === null ? levelShape(level, profile.size) : null;
+  return {
+    profile,
+    paths: packedPuzzle(seed, profile, shape),
+    size: profile.size,
+    ...(shape ? { shape } : {}),
+  };
 }
 function solvable(paths, size) {
   const occupied = new Map(
@@ -179,8 +186,11 @@ function solvable(paths, size) {
   }
   return true;
 }
-function packedPuzzle(seed, profile) {
+function packedPuzzle(seed, profile, shape = null) {
   const size = profile.size;
+  const allowed = shape
+    ? new Set(shape.cells.map(([x, y]) => y * size + x))
+    : null;
   let state = seed >>> 0;
   const rand = () => {
     state = (state * 1664525 + 1013904223) >>> 0;
@@ -189,6 +199,7 @@ function packedPuzzle(seed, profile) {
   let paths = [];
   for (let y = 0; y < size; y++)
     for (let x = 0; x < size; x++) {
+      if (allowed && !allowed.has(y * size + x)) continue;
       const distances = [x, size - 1 - x, y, size - 1 - y];
       paths.push({
         id: paths.length,

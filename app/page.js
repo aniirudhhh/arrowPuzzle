@@ -161,7 +161,7 @@ export default function Game() {
     }
   }, [screen, game?.time, game?.challenge]);
   function start(level = 1, daily = false, resume = false, challenge = false) {
-    const { size, paths, profile, timeLimit, version, seed } = challenge
+    const { size, paths, profile, timeLimit, version, seed, shape } = challenge
       ? createChallenge(level)
       : daily
         ? createDaily(Number(stamp().replaceAll("-", "")))
@@ -178,6 +178,7 @@ export default function Game() {
             hintsUsed: 0,
             timeLimit: challenge ? timeLimit : null,
             size,
+            shape,
             profile,
             paths,
             total: paths.length,
@@ -795,6 +796,7 @@ export default function Game() {
                     />
                   ))}
                   <span>
+                    {game.shape ? `${game.shape.name.toUpperCase()} / ` : ""}
                     {
                       (game.profile ?? levelProfile(game.level, game.daily))
                         .label
@@ -812,6 +814,7 @@ export default function Game() {
                   <span className="corner bl" />
                   <span className="corner br" />
                   <Board
+                    shape={game.shape}
                     paths={game.paths}
                     size={game.size}
                     onMove={move}
